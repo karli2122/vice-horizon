@@ -37,6 +37,9 @@ All gameplay code, city generation, shaders, HUD and audio synthesis are origina
 - 4K versions of Poly Haven CC0 textures already in the game: [Asphalt 05](https://polyhaven.com/a/asphalt_05) and [Concrete Pavers 02](https://polyhaven.com/a/concrete_pavers_02), diffuse maps only, used for road and sidewalk on High/Ultra. Encoded to KTX2 (Basis ETC1S) with KTX-Software. CC0.
 - Drive-by shooting, gang drive-by cars, police pursuit AI and the car fuel-fire phase are written in code. There are no other new third-party assets.
 
+## v5a.2 additions
+- The Ocean Drive look is generated in code with no new third-party assets: boulevard median, carriageway, promenade and sea wall, beach crowd, umbrellas, art-deco awnings, planters, neon blade signs, palm sway, the supertall glass skyline, daylight colour grade, HUD restyle, police helicopter and the tank models.
+
 ## Runtime libraries (loaded from CDN)
 - [three.js](https://threejs.org) r160 — MIT License (unpkg.com).
 
