@@ -33,6 +33,10 @@ All gameplay code, city generation, shaders, HUD and audio synthesis are origina
 - The v5a world is generated in code: island heightmaps and coastlines, hills, the Keller Causeway and Solana Bridge, the car ferry and piers, the port, venue exteriors and every interior (safehouse, bar, nightclub, cabaret, diner, gun shop), chests, flamingo collectibles and the big-map art.
 - v5a adds no new third-party models, textures, sounds or fonts.
 
+## v5a.1 additions
+- 4K versions of Poly Haven CC0 textures already in the game: [Asphalt 05](https://polyhaven.com/a/asphalt_05) and [Concrete Pavers 02](https://polyhaven.com/a/concrete_pavers_02), diffuse maps only, used for road and sidewalk on High/Ultra. Encoded to KTX2 (Basis ETC1S) with KTX-Software. CC0.
+- Drive-by shooting, gang drive-by cars, police pursuit AI and the car fuel-fire phase are written in code. There are no other new third-party assets.
+
 ## Runtime libraries (loaded from CDN)
 - [three.js](https://threejs.org) r160 — MIT License (unpkg.com).
 
