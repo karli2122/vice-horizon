@@ -29,6 +29,10 @@ All gameplay code, city generation, shaders, HUD and audio synthesis are origina
 - Street clutter, decals, signage, road markings, boats, bushes, grass, rain, clouds, lens flares and all v4 shader effects are generated in code — no new third-party assets were added in v4.
 - three.js addon passes used at runtime from the CDN: GTAOPass, Pass/FullScreenQuad, ShaderPass, UnrealBloomPass, OutputPass, FXAAShader (MIT).
 
+## Procedural / generated content (v5a, no external files)
+- The v5a world is generated in code: island heightmaps and coastlines, hills, the Keller Causeway and Solana Bridge, the car ferry and piers, the port, venue exteriors and every interior (safehouse, bar, nightclub, cabaret, diner, gun shop), chests, flamingo collectibles and the big-map art.
+- v5a adds no new third-party models, textures, sounds or fonts.
+
 ## Runtime libraries (loaded from CDN)
 - [three.js](https://threejs.org) r160 — MIT License (unpkg.com).
 
