@@ -337,7 +337,7 @@ const QUALITY = {
   low: { pr: 0.85, shadow: 0, bloom: false, fxaa: true, grain: false, peds: 12, traffic: 8, far: 900, fogMul: 1.35, detNor: false, humanShadow: false, carShadow: false },
   medium: { pr: 1.15, shadow: 1024, bloom: true, fxaa: true, grain: true, peds: 18, traffic: 12, far: 1600, fogMul: 1.1, detNor: true, humanShadow: false, carShadow: true, blur: true, props: true },
   high: { pr: 1.5, shadow: 2048, bloom: true, fxaa: true, grain: true, peds: 26, traffic: 18, far: 3200, fogMul: 1.0, detNor: true, humanShadow: true, carShadow: true, tex2k: true, ao: 0.5, blur: true, props: true },
-  ultra: { pr: 2.0, shadow: 4096, bloom: true, fxaa: true, grain: true, peds: 34, traffic: 22, far: 3200, fogMul: 0.9, detNor: true, humanShadow: true, carShadow: true, tex2k: true, ao: 1, blur: true, props: true },
+  ultra: { pr: 2.0, shadow: 4096, bloom: true, fxaa: true, grain: true, peds: 34, traffic: 22, far: 3200, fogMul: 0.9, detNor: true, humanShadow: true, carShadow: true, tex2k: true, tex4k: true, ao: 1, blur: true, props: true },
 };
 function autoQuality() {
   if (!IS_MOBILE) return 'high';
@@ -1008,10 +1008,10 @@ const ASSET_LIST = [
   ['hdrDay', 'hdr', 'assets/hdri/kloofendal_48d_partly_cloudy_puresky_1k.hdr', 1400],
   ['hdrSet', 'hdr', 'assets/hdri/the_sky_is_on_fire_1k.hdr', 1490],
   ['hdrNight', 'hdr', 'assets/hdri/satara_night_no_lamps_1k.hdr', 1820],
-  ['asphaltD', 'tex', Q.tex2k ? 'assets/textures/asphalt_05_diff_4k.jpg' : 'assets/textures/asphalt_05_diff_1k.jpg', Q.tex2k ? 3000 : 900, { srgb: true }],
-  ['asphaltN', 'tex', Q.tex2k ? 'assets/textures/asphalt_05_nor_gl_2k.jpg' : 'assets/textures/asphalt_05_nor_gl_1k.jpg', 1330, { nor: true }],
+  ['asphaltD', 'tex', Q.tex4k ? 'assets/textures/asphalt_05_diff_4k.jpg' : Q.tex2k ? 'assets/textures/asphalt_05_diff_2k.jpg' : 'assets/textures/asphalt_05_diff_1k.jpg', Q.tex4k ? 3000 : Q.tex2k ? 840 : 900, { srgb: true }], // v5b: 4K is Ultra-only (High = 2K, Low/Medium = 1K)
+  ['asphaltN', 'tex', Q.tex4k ? 'assets/textures/asphalt_05_nor_gl_4k.jpg' : Q.tex2k ? 'assets/textures/asphalt_05_nor_gl_2k.jpg' : 'assets/textures/asphalt_05_nor_gl_1k.jpg', Q.tex4k ? 9000 : 1330, { nor: true }],
   ['asphaltR', 'tex', 'assets/textures/asphalt_05_rough_1k.jpg', 700, { nor: true }],
-  ['paversD', 'tex', Q.tex2k ? 'assets/textures/concrete_pavers_02_diff_4k.jpg' : 'assets/textures/concrete_pavers_02_diff_1k.jpg', Q.tex2k ? 2850 : 600, { srgb: true }],
+  ['paversD', 'tex', Q.tex4k ? 'assets/textures/concrete_pavers_02_diff_4k.jpg' : Q.tex2k ? 'assets/textures/concrete_pavers_02_diff_2k.jpg' : 'assets/textures/concrete_pavers_02_diff_1k.jpg', Q.tex4k ? 2850 : Q.tex2k ? 770 : 600, { srgb: true }],
   ['paversN', 'tex', Q.tex2k ? 'assets/textures/concrete_pavers_02_nor_gl_2k.jpg' : 'assets/textures/concrete_pavers_02_nor_gl_1k.jpg', 600, { nor: true }],
   ['paversR', 'tex', 'assets/textures/concrete_pavers_02_rough_1k.jpg', 330, { nor: true }],
   ['sandD', 'tex', 'assets/textures/coast_sand_01_diff_1k.jpg', 940, { srgb: true }],
@@ -1020,7 +1020,7 @@ const ASSET_LIST = [
   ['plasterD', 'tex', 'assets/textures/beige_wall_001_diff_1k.jpg', 33, { srgb: true }],
   ['plasterN', 'tex', 'assets/textures/beige_wall_001_nor_gl_1k.jpg', 150, { nor: true }],
   ['plasterR', 'tex', 'assets/textures/beige_wall_001_rough_1k.jpg', 148, { nor: true }],
-  ['brickD', 'tex', 'assets/textures/red_brick_03_diff_1k.jpg', 240, { srgb: true }],
+  ['brickD', 'tex', Q.tex4k ? 'assets/textures/red_brick_03_diff_4k.jpg' : 'assets/textures/red_brick_03_diff_1k.jpg', Q.tex4k ? 3300 : 240, { srgb: true }],
   ['brickN', 'tex', 'assets/textures/red_brick_03_nor_gl_1k.jpg', 211, { nor: true }],
   ['brickR', 'tex', 'assets/textures/red_brick_03_rough_1k.jpg', 89, { nor: true }],
   ['propHydrant', 'gltf', 'assets/props/fire_hydrant.glb', 168],
@@ -1030,6 +1030,7 @@ const ASSET_LIST = [
   ['ferrari', 'gltf', 'assets/models/ferrari_lod0.glb', 160],
   ['ferrariLo', 'gltf', 'assets/models/ferrari_lod1.glb', 55],
   ['ferrariAO', 'tex', 'assets/models/ferrari_ao.png', 40, { srgb: true, clamp: true }],
+  ['kenney', 'gltf', 'assets/models/kenney_vehicles.glb', 80], // v5b: Kenney Car Kit + Watercraft Kit (CC0)
   ['mannequin', 'gltf', QNAME === 'low' || QNAME === 'medium' ? 'assets/characters/ual_mannequin_lo.glb' : 'assets/characters/ual_mannequin.glb', 282], // Low/Medium: 4k-tri simplified LOD
 ];
 const TEX_FMT = {};
@@ -1361,6 +1362,11 @@ const VENUES = [
   { id: 'deli', name: 'DOCKSIDE DELI', css: '#29f0ff', kind: 'diner', bx: 86, bz: 43, side: 'w', hours: [6, 22], h: 6, color: '#d8e6ee' },
   { id: 'ammu3', name: 'AMMU-NATION HILLS', css: '#ff5a3b', kind: 'gun', bx: 37, bz: 69, side: 's', hours: [8, 22], h: 7, color: '#c9b79a' },
   { id: 'liquor', name: 'SOLANA LIQUOR & DELI', css: '#3bff8a', kind: 'diner', bx: 33, bz: 69, side: 's', hours: [7, 2], h: 6, color: '#efe2c4' },
+  // v5b: bank (heist), clothes + tattoo shops
+  { id: 'bank', name: 'VICE NATIONAL BANK', css: '#4fb0ff', kind: 'bank', bx: 62, bz: 58, side: 's', hours: null, h: 11, color: '#d9d2c2' },
+  { id: 'threads', name: 'NEON THREADS', css: '#ff4fd8', kind: 'clothes', bx: 64, bz: 76, side: 'e', hours: [9, 23], h: 6, color: '#f1e3f6' },
+  { id: 'ink', name: 'INK & NEON TATTOO', css: '#ff2b6b', kind: 'tattoo', bx: 63, bz: 75, side: 'e', hours: [12, 4], h: 6, color: '#2a1c36' },
+  { id: 'threads2', name: 'SOLANA THREADS', css: '#ff4fd8', kind: 'clothes', bx: 30, bz: 69, side: 's', hours: [9, 22], h: 6, color: '#e9dff0' },
 ];
 const VENUE_AT = new Map();
 for (const V of VENUES) {
@@ -3976,7 +3982,7 @@ function applyFX() {
   if (sh && sun.shadow.mapSize.x !== sh) { sun.shadow.mapSize.set(sh, sh); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
   const ext = sh >= 4096 ? 55 : sh >= 2048 ? 70 : 80; const sc = sun.shadow.camera; sc.left = -ext; sc.right = ext; sc.top = ext; sc.bottom = -ext; sc.updateProjectionMatrix();
   sun.shadow.radius = sh >= 4096 ? 3 : 2; sun.shadow.bias = sh >= 4096 ? -0.00025 : -0.0004; sun.shadow.normalBias = sh >= 4096 ? 0.025 : 0.04;
-  BAKE.value = G.shadows ? 0 : 1;
+  BAKE.value = G.shadows ? 0 : 1; if (typeof applyCascades === 'function') applyCascades(); // v5b: High/Ultra cascades
   const ao = FX('ao'), ssr = FX('ssr'), dof = FX('dof');
   gtaoPass.enabled = ao || ssr || dof; gtaoPass.blendIntensity = ao ? 0.85 : 0;
   ssrPass.enabled = ssr; dofPass.enabled = dof; if (gtaoPass.enabled) { ssrPass.uniforms.tDepth.value = dofPass.uniforms.tDepth.value = gtaoPass.depthTexture; ssrPass.uniforms.tNormal.value = gtaoPass.normalTexture; }
@@ -4032,6 +4038,61 @@ function updateFX(dt) {
     const w = wrapAngle(dyaw) / dt, pv = dp / dt; const k = 0.0035; let bx = clamp(-w * k, -0.02, 0.02), by = clamp(pv * k, -0.015, 0.015); if (Math.hypot(bx, by) < 0.0015) { bx = 0; by = 0; }
     grainPass.uniforms.uBlurDir.value.set(bx, by);
   } else grainPass.uniforms.uBlurDir.value.set(0, 0);
+}
+// =====================================================================
+//  v5b CASCADED SHADOW MAPS (High: 2 cascades, Ultra: 3). Never created on Low/Medium.
+//  The sun stays light #0 (near cascade, full intensity); extra directional lights with intensity 0 only
+//  supply wider shadow maps. A patched shadow chunk picks/blends cascades per fragment (smooth hand-off).
+// =====================================================================
+var CASC = { lights: [], n: 1, on: false, patched: false, ok: true, cfg: { 2: [[34, 2048, -0.0003, 0.03], [150, 2048, -0.0007, 0.09]], 3: [[26, 4096, -0.00025, 0.025], [85, 2048, -0.0006, 0.07], [260, 2048, -0.001, 0.15]] } };
+function cascadePatchShader() {
+  if (CASC.patched) return CASC.ok; CASC.patched = true;
+  const needle = 'directLight.color *= ( directLight.visible && receiveShadow ) ? getShadow( directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;';
+  const A = THREE.ShaderChunk.lights_fragment_begin, B = THREE.ShaderChunk.shadowmap_pars_fragment;
+  if (!A.includes(needle) || !B.includes('vDirectionalShadowCoord')) { CASC.ok = false; console.warn('[cascades] shader chunk layout differs — cascades disabled'); return false; }
+  THREE.ShaderChunk.lights_fragment_begin = A.replace(needle, `#if NUM_DIR_LIGHT_SHADOWS > 1
+		#if UNROLLED_LOOP_INDEX == 0
+		directLight.color *= ( directLight.visible && receiveShadow ) ? vhCascadeShadow() : 1.0;
+		#endif
+		#else
+		${needle}
+		#endif`);
+  THREE.ShaderChunk.shadowmap_pars_fragment = B + `
+#if defined( USE_SHADOWMAP ) && NUM_DIR_LIGHT_SHADOWS > 1
+float vhCascadeShadow() {
+  vec4 q0 = vDirectionalShadowCoord[ 0 ]; vec4 q1 = vDirectionalShadowCoord[ 1 ];
+  float e0 = max( abs( q0.x / q0.w - 0.5 ), abs( q0.y / q0.w - 0.5 ) ); float e1 = max( abs( q1.x / q1.w - 0.5 ), abs( q1.y / q1.w - 0.5 ) );
+  float s0 = getShadow( directionalShadowMap[ 0 ], directionalLightShadows[ 0 ].shadowMapSize, directionalLightShadows[ 0 ].shadowBias, directionalLightShadows[ 0 ].shadowRadius, q0 );
+  float s1 = getShadow( directionalShadowMap[ 1 ], directionalLightShadows[ 1 ].shadowMapSize, directionalLightShadows[ 1 ].shadowBias, directionalLightShadows[ 1 ].shadowRadius, q1 );
+  float t0 = smoothstep( 0.37, 0.5, e0 ); float t1 = smoothstep( 0.37, 0.5, e1 );
+  #if NUM_DIR_LIGHT_SHADOWS > 2
+  vec4 q2 = vDirectionalShadowCoord[ 2 ]; float e2 = max( abs( q2.x / q2.w - 0.5 ), abs( q2.y / q2.w - 0.5 ) );
+  float s2 = getShadow( directionalShadowMap[ 2 ], directionalLightShadows[ 2 ].shadowMapSize, directionalLightShadows[ 2 ].shadowBias, directionalLightShadows[ 2 ].shadowRadius, q2 );
+  float t2 = smoothstep( 0.37, 0.5, e2 ); s1 = mix( s1, mix( s2, 1.0, t2 ), t1 ); return mix( s0, s1, t0 );
+  #else
+  s1 = mix( s1, 1.0, t1 ); return mix( s0, s1, t0 );
+  #endif
+}
+#endif`;
+  return true;
+}
+function applyCascades() {
+  const want = (QNAME === 'high' || QNAME === 'ultra') && G.shadows ? (QNAME === 'ultra' && FX('shadows') >= 4096 ? 3 : 2) : 1;
+  if (want > 1 && !cascadePatchShader()) return;
+  const have = CASC.lights.length + 1; if (want === have && CASC.on === (want > 1)) { if (want > 1) cascadeConfigure(); return; }
+  for (const L of CASC.lights) { scene.remove(L); scene.remove(L.target); if (L.shadow.map) { L.shadow.map.dispose(); L.shadow.map = null; } } CASC.lights.length = 0;
+  CASC.n = want; CASC.on = want > 1;
+  for (let i = 1; i < want; i++) { const L = new THREE.DirectionalLight(0xffffff, 0); L.castShadow = true; L.shadow.camera.near = 1; L.shadow.camera.far = 420; scene.add(L); scene.add(L.target); CASC.lights.push(L); }
+  cascadeConfigure();
+}
+function cascadeConfigure() {
+  if (!CASC.on) return; const cfg = CASC.cfg[CASC.n], all = [sun, ...CASC.lights];
+  all.forEach((L, i) => { const [ext, size, bias, nb] = cfg[i]; const sc = L.shadow.camera; sc.left = -ext; sc.right = ext; sc.top = ext; sc.bottom = -ext; sc.updateProjectionMatrix(); L.shadow.radius = 2; L.shadow.bias = bias; L.shadow.normalBias = nb;
+    if (L.shadow.mapSize.x !== size) { L.shadow.mapSize.set(size, size); if (L.shadow.map) { L.shadow.map.dispose(); L.shadow.map = null; } } L.castShadow = true; });
+}
+function cascadeUpdate() {
+  if (!CASC.on) return; const p = playerWorldPos();
+  for (const L of CASC.lights) { const sc = L.shadow.camera, tx = (sc.right - sc.left) / L.shadow.mapSize.x, fx = Math.round(p.x / tx) * tx, fz = Math.round(p.z / tx) * tx; L.position.set(fx + lightDir.x * 200, lightDir.y * 200, fz + lightDir.z * 200); L.target.position.set(fx, 0, fz); L.target.updateMatrixWorld(); }
 }
 
 // =====================================================================
@@ -4305,7 +4366,7 @@ function genPrison(L, bx, bz, R2) {
   const I = ISLANDS[3], g = I.grect; if (bx !== I.grid[0] || bz !== I.grid[2]) return; // the whole compound is built once from its first block
   const x0 = g.x0 + 20, x1 = g.x1 - 20, z0 = g.z0 + 20, z1 = g.z1 - 20, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, W = x1 - x0, D = z1 - z0;
   L.slab.push({ x: cx, y: 0.075, z: cz, sx: W, sy: 0.15, sz: D });
-  for (const [x, z, sx, sz] of [[cx, z0, W, 1.2], [cx, z1, W, 1.2], [x0, cz, 1.2, D], [x1, cz, 1.2, D]]) { L.stucco.push({ x, y: 4, z, sx, sy: 8, sz, color: '#b8b4a8' }); addColl(L, bx, bz, x, z, sx, sz, 8, 0); }
+  for (const [x, z, sx, sz] of [[cx, z0, W, 1.2], [cx, z1, W, 1.2], [x0, (z0 + cz - 6) / 2, 1.2, cz - 6 - z0], [x0, (z1 + cz + 6) / 2, 1.2, z1 - cz - 6], [x1, cz, 1.2, D]]) { L.stucco.push({ x, y: 4, z, sx, sy: 8, sz, color: '#b8b4a8' }); addColl(L, bx, bz, x, z, sx, sz, 8, 0); }
   for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) { L.stucco.push({ x, y: 7, z, sx: 4.5, sy: 14, sz: 4.5, color: '#9a968c' }); L.dark.push({ x, y: 14.6, z, sx: 5.4, sy: 1.2, sz: 5.4, c: [0.2, 0.2, 0.22] }); }
   for (let k = 0; k < 3; k++) { const z = z0 + 40 + k * 55; L.stucco.push({ x: cx - 30, y: 6, z, sx: 70, sy: 12, sz: 22, color: '#c9c4b6' }); addColl(L, bx, bz, cx - 30, z, 70, 22, 12, 0); }
   L.stucco.push({ x: cx + 60, y: 9, z: cz, sx: 34, sy: 18, sz: 40, color: '#a9a49a' }); addColl(L, bx, bz, cx + 60, cz, 34, 40, 18, 0);
@@ -4916,7 +4977,7 @@ function openPanel(title, lines, opts) {
   el.appendChild(row); el.classList.add('open'); UI.open = title; G.talking = true; mouse.down = false;
   if (document.pointerLockElement) document.exitPointerLock();
 }
-function closePanel() { $('dlgPanel').classList.remove('open'); UI.open = null; G.talking = false; if (!TOUCH.on && G.state === 'playing' && !document.pointerLockElement) { try { requestLock(); } catch (e) { /* needs gesture */ } } }
+function closePanel() { if (HACK.active) HACK.abort(); $('dlgPanel').classList.remove('open'); UI.open = null; G.talking = false; if (!TOUCH.on && G.state === 'playing' && !document.pointerLockElement) { try { requestLock(); } catch (e) { /* needs gesture */ } } }
 const AMMU_ITEMS = [
   { label: 'Pistol ammo x24', cost: 60, fn: () => giveWeapon(1, 24) },
   { label: 'Rapid SMG + 60', cost: 450, own: 2, fn: () => giveWeapon(2, 60) },
@@ -5027,7 +5088,9 @@ function talkTarget() {
   return best;
 }
 function interactKey() {
+  if (HACK.active) return;
   if (UI.open) { closePanel(); return; }
+  if (v5bInteract()) return;
   if (interiorInteract()) return;
   const td = takedownTarget(); if (td) { doTakedown(td); return; }
   const ev = eventInteract(); if (ev) return;
@@ -5173,17 +5236,18 @@ function eventInteract() {
   return false;
 }
 // ---------- save / load (versioned) ----------
-const SAVE_KEY = 'vh-save', SAVE_VERSION = 2;
+const SAVE_KEY = 'vh-save', SAVE_VERSION = 3; // v3 (v5b): adds the v5b block (ops, empire, wardrobe)
 function saveGame(reason) {
   if (G.state !== 'playing' && reason !== 'manual') return false;
   const p = INT.cur ? INT.ret : playerWorldPos(); const [i, j] = nearestNode(p.x, p.z);
-  const data = { v: SAVE_VERSION, world: 'v5', garage: G.garage || [], collect: G.collect || {}, respect: G.respect || 0, bounties: G.bountyMap || {}, visits: G.visits || {}, t: Date.now(), reason, pos: { x: nodeX(i) + 9.5, z: nodeX(j) + 20 }, cash: Math.floor(G.cash), weapon: player.weapon, owned: player.owned.slice(), mag: player.mag.slice(), res: player.res.slice(),
+  const data = { v: SAVE_VERSION, world: 'v5', v5b: v5bSave(), garage: G.garage || [], collect: G.collect || {}, respect: G.respect || 0, bounties: G.bountyMap || {}, visits: G.visits || {}, t: Date.now(), reason, pos: { x: nodeX(i) + 9.5, z: nodeX(j) + 20 }, cash: Math.floor(G.cash), weapon: player.weapon, owned: player.owned.slice(), mag: player.mag.slice(), res: player.res.slice(),
     hp: Math.round(player.hp), armor: Math.round(player.armor), carColor: player.car ? player.car.color : (player.lastCar ? player.lastCar.color : null), missions: G.missionsDone || {}, bounty: BOUNTY.idx, tod: G.tod };
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); G.lastSave = G.time; return true; } catch (e) { return false; }
 }
 function migrateSave(d) { // v1 (v4 single city) -> v2 (v5 islands): add the new per-world state, keep everything else
   if (!d || typeof d !== 'object') return null; if (!d.v) d.v = 1;
   if (d.v === 1) { d.world = 'v5'; d.garage = []; d.collect = {}; d.respect = 0; d.bounties = { vice: d.bounty || 0 }; d.visits = {}; d.migratedFrom = 1; d.v = 2; }
+  if (d.v === 2) { d.v5b = d.v5b || {}; d.migratedFrom = d.migratedFrom || 2; d.v = 3; } // v2 (v5a) -> v3 (v5b): defaults filled in by v5bLoad
   return d.v === SAVE_VERSION ? d : null;
 }
 function loadGame() {
@@ -5196,6 +5260,7 @@ function loadGame() {
   G.missionsDone = d.missions || {}; BOUNTY.idx = d.bounty || 0; if (d.tod !== undefined && !S.lockTime) G.tod = d.tod; G.saveColor = d.carColor;
   G.garage = Array.isArray(d.garage) ? d.garage.slice(0, 2) : []; G.collect = d.collect || {}; G.respect = d.respect || 0; G.bountyMap = d.bounties || {}; G.visits = d.visits || {};
   if (typeof applyCollected === 'function') applyCollected();
+  v5bLoad(d.v5b || {});
   return true;
 }
 function updateAutosave() { if (G.state === 'playing' && G.time - (G.lastSave || 0) > 60) saveGame('auto'); }
@@ -5227,7 +5292,7 @@ function updateAimStick(dt) {
 // ---------- per-frame glue ----------
 function updateWorldSystems(dt) {
   for (const pl of PLACES) if (pl.ring) { pl.ring.rotation.y += dt; }
-  updateDrops(dt); updateGangs(dt); updateRobbery(dt); updateEvents(dt); updateHeat(dt); updateHints(dt); updateAutosave(); updateAimStick(dt);
+  updateDrops(dt); if (typeof updateV5b === 'function') updateV5b(dt); updateGangs(dt); updateRobbery(dt); updateEvents(dt); updateHeat(dt); updateHints(dt); updateAutosave(); updateAimStick(dt);
   if (BIG.open) { BIG.t -= dt; if (BIG.t <= 0) { BIG.t = 0.25; drawBigMap(); } }
   if (BOUNTY.active && !BOUNTY.ents.some((q) => q.leader && peds.includes(q))) { BOUNTY.active = null; clearWaypoint(); }
   if (WAYPOINT.on && Math.hypot(player.pos.x - WAYPOINT.x, player.pos.z - WAYPOINT.z) < 6 && !player.car) clearWaypoint();
@@ -5330,7 +5395,7 @@ function buildInterior(V, k) {
     box(3.5, 0.4, -4.2, 4.5, 0.8, 1.6, INTM.box('#3b5b8a'), true); box(3.5, 1.6, -5.9, 3.4, 1.8, 0.1, INTM.box('#050505', { e: '#29f0ff', ei: 0.35 }));
     box(5.8, 1.1, 2, 1.0, 2.2, 3.0, INTM.box('#7a5a3a'), true);
     R.acts.push({ x: ox - 4.5, z: oz - 3.5, r: 2.6, label: 'Sleep & save (skip to 08:00)', fn: () => { saveGame('manual'); G.tod = Math.floor(G.tod) + 1 + 8 / 24; G.lastEnvTod = -1; player.hp = 100; toast('GAME SAVED — GOOD MORNING', '#3bff8a'); } });
-    R.acts.push({ x: ox + 5.8, z: oz + 2, r: 2.2, label: 'Wardrobe (outfits come in v5b)', fn: () => toast('WARDROBE: new outfits arrive with the clothes shops', '#ffd23b') });
+    R.acts.push({ x: ox + 5.8, z: oz + 2, r: 2.2, label: 'Wardrobe (change outfit)', fn: () => openWardrobe('home') });
     R.acts.push({ x: ox + 3.5, z: oz - 4.2, r: 2.4, label: 'Garage status', fn: () => toast('GARAGE: ' + garageList().length + '/2 cars stored', '#3bff8a') });
   } else if (V.kind === 'bar') {
     counter(0, -Dd / 2 + 2, W - 6, 1.2); box(0, 2.2, -Dd / 2 + 0.3, W - 6, 2.4, 0.5, INTM.box('#2a1a14')); for (let x = -W / 2 + 4; x < W / 2 - 3; x += 0.7) box(x, 2.0 + (x * 7 % 3) * 0.3, -Dd / 2 + 0.6, 0.18, 0.5, 0.18, INTM.box(['#3bff8a', '#ffb23b', '#29f0ff', '#ff5fa8'][Math.abs(Math.round(x * 3)) % 4], { r: 0.1, e: '#222', ei: 0.3 }));
@@ -5374,7 +5439,7 @@ function buildInterior(V, k) {
     neon(0, 3.8, -Dd / 2 + 0.12, 7, 0.14, 0.08, '#ff5a3b');
     human(0, -Dd / 2 + 1.4, 0, { skin: '#c68e6a', shirt: '#4a5a3a', pants: '#2a2a2a', hair: '#3a2a1a' }, 'idle');
     R.acts.push({ x: ox, z: oz - Dd / 2 + 3.6, r: 2.8, label: 'Browse weapons', fn: () => openAmmu() });
-  }
+  } else interiorExtra(V, R, { box, neon, counter, human, W, Dd, H });
   return R;
 }
 const INTERIORS = new Map();
@@ -5524,6 +5589,699 @@ function updateCollectibles(dt) {
 MINI_EXTRAS.push((blip, p) => { for (const f of COLLECT.flam) if (!(G.collect.f || {})[f.id] && Math.hypot(f.x - p.x, f.z - p.z) < 70) blip(f.x, f.z, '#ff5fa8', 3); });
 MAP_EXTRAS.push((pt, P, g, s) => { const [x, y] = [14, 24]; g.save(); g.font = 'bold 15px Arial'; g.textAlign = 'left'; g.fillStyle = '#ff5fa8'; g.fillText('FLAMINGOS ' + collectCount() + '/' + COLLECT.flam.length + '   CHESTS ' + Object.keys(G.collect.c || {}).length + '/' + COLLECT.chests.length + '   TURFS ' + Object.keys(G.collect.turf || {}).length + '/' + WAR_SPOTS.length + '   RESPECT ' + (G.respect || 0), x, y); g.restore();
   for (const t of TERRITORIES) if ((G.collect.turf || {})[t.name]) { const [a, b, c, d] = polyBounds(t.poly); pt((a + c) / 2, (b + d) / 2, 5, '#3bff8a', ''); } });
+// ===================== v5b: new vehicles — Kenney Car Kit + Watercraft Kit (CC0) traffic/boats, procedural seaplane =====================
+const KTYPE = (o) => Object.assign({ custom: true, bodyH: 0.8, cabH: 0.6, cabLen: 2, cabOff: 0, clear: 0.3, wheelR: 0.4, colors: ['#ffffff'] }, o);
+Object.assign(CAR_TYPES, {
+  van: KTYPE({ kenney: 'van', len: 5.1, wid: 2.05, maxSpeed: 40, accel: 11, grip: 8, mass: 2000, steer: 0.52, wheelR: 0.44 }),
+  boxtruck: KTYPE({ kenney: 'truck', len: 5.8, wid: 2.25, maxSpeed: 36, accel: 9, grip: 7.5, mass: 2600, steer: 0.48, wheelR: 0.48 }),
+  ambulance: KTYPE({ kenney: 'ambulance', len: 6.0, wid: 2.25, maxSpeed: 44, accel: 12, grip: 8, mass: 2600, steer: 0.5, wheelR: 0.46 }),
+  delivery: KTYPE({ kenney: 'delivery', len: 6.0, wid: 2.25, maxSpeed: 36, accel: 9, grip: 7.5, mass: 2600, steer: 0.48, wheelR: 0.46 }),
+  sport3: KTYPE({ kenney: 'sedan-sports', len: 4.6, wid: 1.95, maxSpeed: 55, accel: 16, grip: 9.2, mass: 1250, steer: 0.62, wheelR: 0.38 }),
+  luxsuv: KTYPE({ kenney: 'suv-luxury', len: 4.9, wid: 2.05, maxSpeed: 46, accel: 13, grip: 8.4, mass: 1900, steer: 0.55, wheelR: 0.44 }),
+  speedboat: KTYPE({ boat: true, kenney: 'boat-speed-a', len: 6.8, wid: 3.4, maxSpeed: 32, accel: 8, grip: 1, mass: 1500, steer: 0.55, camDist: 10, camH: 3.2 }),
+  jetboat: KTYPE({ boat: true, kenney: 'boat-speed-e', len: 5.8, wid: 3.6, maxSpeed: 36, accel: 10, grip: 1, mass: 1100, steer: 0.62, camDist: 9.5, camH: 3 }),
+  fishboat: KTYPE({ boat: true, kenney: 'boat-fishing-small', len: 7.6, wid: 3.4, maxSpeed: 19, accel: 5, grip: 1, mass: 2400, steer: 0.42, camDist: 11, camH: 3.6 }),
+  seaplane: KTYPE({ plane: true, len: 9.4, wid: 2.6, maxSpeed: 72, accel: 9.5, grip: 1, mass: 1100, steer: 0.5, camDist: 17, camH: 4.6 }),
+});
+Object.assign(CAR_VALUE, { van: 900, boxtruck: 1000, ambulance: 1200, delivery: 1000, sport3: 2400, luxsuv: 2000, speedboat: 0, jetboat: 0, fishboat: 0, seaplane: 0 });
+const TRAFFIC_EXTRA = ['van', 'sport3', 'luxsuv', 'boxtruck', 'delivery'];
+function kenneyNode(name) { const k = ASSETS.kenney; if (!k) return null; return k.scene.children.find((c) => c.name === name) || k.scene.getObjectByName(name); }
+const _kbb = new THREE.Box3(), _ksz = new THREE.Vector3();
+Car.prototype.buildCustom = function (type) {
+  const s = this.spec; this.paintMeshes = []; this.wheels = []; this.model = false;
+  this.tailMat = new THREE.MeshStandardMaterial({ color: 0x300000, emissive: 0xff1020, emissiveIntensity: 0.4, roughness: 0.3 });
+  if (s.plane) { buildSeaplane(this); return; }
+  const src = kenneyNode(s.kenney);
+  if (!src) { const m = new THREE.Mesh(boxGeo, paintMat(this.color)); m.scale.set(s.wid, s.boat ? 1.2 : 1.6, s.len); m.position.y = s.boat ? 0.3 : 1.0; this.body.add(m); this.paintMesh = m; return; }
+  const m = src.clone(true); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0); m.scale.setScalar(1); m.updateMatrixWorld(true);
+  _kbb.setFromObject(m); _kbb.getSize(_ksz); const k = s.len / _ksz.z; m.scale.setScalar(k); m.position.y = -_kbb.min.y * k; m.position.z = -(_kbb.min.z + _kbb.max.z) / 2 * k;
+  this.body.add(m); let body = null;
+  m.traverse((o) => { if (!o.isMesh) return; o.castShadow = Q.carShadow; o.receiveShadow = true; if (!body && !/wheel/.test(o.name)) body = o; });
+  for (const w of m.children.slice()) if (/^wheel/.test(w.name)) {
+    const pivot = new THREE.Group(); pivot.position.copy(w.position); m.add(pivot); w.position.set(0, 0, 0); pivot.add(w);
+    this.wheels.push({ pivot, tire: w, front: /front/.test(w.name), x: pivot.position.x * k, z: pivot.position.z * k + m.position.z });
+  }
+  this.paintMesh = body || new THREE.Mesh();
+  if (!s.boat) { const h = _ksz.y * k, zb = -s.len / 2 + 0.04; for (const sx of [-1, 1]) { const t = new THREE.Mesh(boxGeo, this.tailMat); t.scale.set(0.32, 0.14, 0.05); t.position.set(sx * s.wid * 0.36, h * 0.42, zb); this.body.add(t); } }
+};
+// ---------- seaplane: procedural (fuselage, high wing, tail, floats, spinning prop) ----------
+function buildSeaplane(c) {
+  const g = c.body, paint = paintMat(c.color === '#ffffff' ? '#f4f1e8' : c.color), stripe = new THREE.MeshStandardMaterial({ color: 0xff2f8f, roughness: 0.5 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x22262c, roughness: 0.6, metalness: 0.4 }), glass = new THREE.MeshStandardMaterial({ color: 0x1b2a3a, roughness: 0.1, metalness: 0.6 });
+  const add = (geo, mat, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.set(rx, ry, rz); m.castShadow = Q.carShadow; g.add(m); return m; };
+  const cyl = new THREE.CylinderGeometry(1, 1, 1, 14), cone = new THREE.ConeGeometry(1, 1, 14);
+  const fus = add(cyl, paint, 0, 2.1, 0.4, 0.62, 5.6, 0.7, Math.PI / 2); c.paintMesh = fus;
+  add(cone, paint, 0, 2.1, -4.3, 0.6, 3.6, 0.6, -Math.PI / 2);                       // tail cone
+  add(cyl, stripe, 0, 2.1, 0.4, 0.635, 0.5, 0.715, Math.PI / 2);                      // stripe
+  add(boxGeo, glass, 0, 2.62, 1.75, 1.05, 0.55, 1.3, -0.25);                          // windscreen
+  add(boxGeo, paint, 0, 2.95, 1.0, 11.2, 0.16, 1.7);                                  // high wing
+  for (const s of [-1, 1]) add(boxGeo, stripe, s * 5.3, 2.96, 1.0, 0.6, 0.17, 1.72);  // wingtips
+  for (const s of [-1, 1]) add(boxGeo, dark, s * 1.4, 2.45, 1.2, 0.08, 1.2, 0.12, 0, 0, s * 0.5); // struts
+  add(boxGeo, paint, 0, 2.3, -5.7, 3.6, 0.1, 0.95);                                   // tailplane
+  add(boxGeo, paint, 0, 3.05, -5.75, 0.1, 1.6, 1.0, 0.25);                            // fin
+  add(boxGeo, stripe, 0, 3.6, -5.95, 0.11, 0.5, 0.7, 0.25);
+  for (const s of [-1, 1]) { add(cyl, paint, s * 1.25, 0.42, 0.6, 0.32, 6.2, 0.36, Math.PI / 2); add(boxGeo, dark, s * 1.25, 1.1, 1.6, 0.08, 1.3, 0.08); add(boxGeo, dark, s * 1.25, 1.1, -0.6, 0.08, 1.3, 0.08); }
+  add(cone, dark, 0, 2.1, 3.45, 0.36, 0.5, 0.36, Math.PI / 2);                         // spinner
+  const prop = new THREE.Group(); prop.position.set(0, 2.1, 3.62); g.add(prop);
+  for (let i = 0; i < 2; i++) { const b = new THREE.Mesh(boxGeo, dark); b.scale.set(0.16, 2.3, 0.05); b.rotation.z = i * Math.PI / 2 * 2; prop.add(b); }
+  c.prop = prop; c.plane = true;
+  for (const s of [-1, 1]) { const t = new THREE.Mesh(boxGeo, c.tailMat); t.scale.set(0.12, 0.12, 0.12); t.position.set(s * 5.62, 2.96, 1.0); g.add(t); }
+}
+// ---------- surface helpers ----------
+function seabedY(x, z) { return (bridgeAt(x, z) || (FERRY.on && onFerry(x, z)) || PIERS.some((P) => x >= P.x0 - 1 && x <= P.x1 + 1 && z >= P.z0 - 1 && z <= P.z1 + 1)) ? terrainH(x, z) : groundY5(x, z); }
+function waterDepth(x, z) { return WATER_Y - seabedY(x, z); }
+function findWaterNear(x, z, minDepth = 2.6, r0 = 6) {
+  for (let r = r0; r < 420; r += 6) for (let k = 0; k < 24; k++) { const a = k / 24 * TAU, px = x + Math.sin(a) * r, pz = z + Math.cos(a) * r; if (waterDepth(px, pz) > minDepth && waterDepth(px + Math.sin(a) * 8, pz + Math.cos(a) * 8) > minDepth && !bridgeAt(px, pz)) return { x: px, z: pz, h: a }; }
+  return null;
+}
+// ---------- boat physics (water only; beaches and piers stop you) ----------
+function boatPhysics(c, inp, dt) {
+  const s = c.spec, fx = Math.sin(c.heading), fz = Math.cos(c.heading), rx = -fz, rz = fx;
+  let vf = c.vel.x * fx + c.vel.y * fz, vr = c.vel.x * rx + c.vel.y * rz;
+  c.braking = false; c.throttle = inp.throttle;
+  if (!c.dead && !inp.parked) {
+    if (inp.throttle > 0) vf += s.accel * inp.throttle * (1 - Math.max(0, vf) / s.maxSpeed) * dt;
+    else if (inp.throttle < 0) { if (vf > 0.5) { vf = moveToward(vf, 0, 9 * -inp.throttle * dt); c.braking = true; } else if (vf > -6) vf -= s.accel * 0.4 * -inp.throttle * dt; }
+  }
+  vf *= Math.exp(-(inp.parked ? 0.9 : 0.28) * dt); vr *= Math.exp(-(inp.handbrake ? 0.6 : 1.9) * dt);
+  c.angVel = damp(c.angVel, c.dead ? 0 : inp.steer * s.steer * clamp(vf / 5, -1, 1.5) * (inp.handbrake ? 1.5 : 1), 3, dt);
+  c.vel.set(fx * vf + rx * vr, fz * vf + rz * vr); c.heading = wrapAngle(c.heading + c.angVel * dt);
+  const ox = c.pos.x, oz = c.pos.z; c.pos.x += c.vel.x * dt; c.pos.z += c.vel.y * dt;
+  if (waterDepth(c.pos.x + fx * s.len * 0.45, c.pos.z + fz * s.len * 0.45) < 0.7 || waterDepth(c.pos.x, c.pos.z) < 0.7) { // aground / pier
+    const sp = c.speed; c.pos.x = ox; c.pos.z = oz; c.vel.multiplyScalar(-0.25); if (sp > 7 && typeof impact === 'function') impact(c, sp * 0.6, null);
+  }
+  c.inWater = false; c.vf = vf; c.slip = 0; c.drifting = false; c.spin = 0;
+  c.pitch = damp(c.pitch, -clamp(vf / s.maxSpeed, 0, 1) * 0.11, 2.5, dt); c.roll = damp(c.roll, -c.angVel * clamp(vf / 12, 0, 1) * 0.35, 3, dt);
+  if (vf > 6 && distToCam(c.pos.x, c.pos.z) < 90 && Math.random() < 0.5) smokePuff(c.pos.x - fx * s.len * 0.5 + rr(-0.6, 0.6), WATER_Y + 0.25, c.pos.z - fz * s.len * 0.5 + rr(-0.6, 0.6), 0.97, 0.9 + vf * 0.03, 0.9);
+}
+function boatVisual(c, dt) {
+  const bob = Math.sin(G.time * 1.7 + c.id) * 0.07 + Math.sin(G.time * 2.9 + c.id * 2) * 0.04;
+  c.sinkT = c.dead ? (c.sinkT || 0) + dt : 0; const y = WATER_Y - 0.12 + bob - Math.min(c.sinkT * 0.35, 3.5);
+  c.pos.y = y; c.group.position.copy(c.pos);
+  c.group.rotation.set(Math.sin(G.time * 1.3 + c.id) * 0.025, c.heading, Math.sin(G.time * 1.1 + c.id * 3) * 0.035, 'YXZ'); c.body.rotation.set(c.pitch, 0, c.roll);
+  c.tailMat.emissiveIntensity = c.driver ? 0.4 + G.night * 1.6 : 0.15;
+}
+// ---------- seaplane: arcade flight model ----------
+function planeInputPitch(c) {
+  if (c.driver !== 'player' || G.state !== 'playing') return 0;
+  let p = (KEYS.Space ? 1 : 0) - (KEYS.ShiftLeft || KEYS.KeyC ? 1 : 0);
+  if (TOUCH.on) p = Math.abs(TOUCH.my) > 0.12 ? clamp(-TOUCH.my * 1.3, -1, 1) : 0;
+  return p;
+}
+function planeCrash(c, why) { if (c.dead) return; c.health = 0; c.air = false; if (c.driver === 'player') toast(why || 'CRASHED!', '#ff4040'); }
+function planePhysics(c, inp, dt) {
+  const s = c.spec; c.power = c.power || 0; c.pitchA = c.pitchA || 0; c.rollA = c.rollA || 0; c.speedA = c.speedA || 0;
+  const pIn = planeInputPitch(c), touchBrake = TOUCH.on && !!KEYS.Space && c.driver === 'player';
+  if (c.dead || inp.parked) c.power = moveToward(c.power, 0, dt);
+  else if (TOUCH.on && c.driver === 'player') c.power = moveToward(c.power, touchBrake ? 0 : inp.throttle < -0.3 ? 0.25 : 1, dt * 0.6);
+  else c.power = clamp(c.power + inp.throttle * dt * 0.7, 0, 1);
+  const surf = Math.max(seabedY(c.pos.x, c.pos.z), WATER_Y - 0.05), onWater = seabedY(c.pos.x, c.pos.z) < WATER_Y - 0.4;
+  let v = c.speedA; const lift = clamp((v - 17) / 13, 0, 1) * Math.cos(c.rollA);
+  v += (c.power * s.accel - (s.accel / (s.maxSpeed * s.maxSpeed)) * v * v - 9.8 * Math.sin(c.pitchA) * 0.85) * dt;
+  if (!c.air) v -= ((!KEYS.Space || TOUCH.on) && !touchBrake ? (onWater ? 1.4 : 0.8) : 7) * dt;
+  v = Math.max(0, v);
+  c.rollA = damp(c.rollA, c.air && !c.dead ? -inp.steer * 0.85 : 0, 2.4, dt);
+  const pT = c.air ? clamp(pIn * 0.42 - (lift < 0.6 ? (0.6 - lift) * 0.5 : 0), -0.5, 0.5) : (v > 23 && pIn > 0 ? 0.16 : 0);
+  c.pitchA = damp(c.pitchA, pT, 1.7, dt);
+  if (c.air) c.heading = wrapAngle(c.heading - c.rollA * clamp(v / 30, 0.3, 1.4) * 0.75 * dt);
+  else c.heading = wrapAngle(c.heading + inp.steer * 0.55 * clamp(v / 8, 0, 1) * dt);
+  const vy = c.air ? v * Math.sin(c.pitchA) * Math.max(lift, 0.15) - (1 - lift) * 11 : (v > 23 && pIn > 0 ? 7.5 : 0); // >0.6 m equilibrium against the visual ground-damp so takeoff actually lifts
+  const ch = Math.cos(c.pitchA);
+  c.pos.x += Math.sin(c.heading) * v * ch * dt; c.pos.z += Math.cos(c.heading) * v * ch * dt; c.pos.y += vy * dt;
+  if (c.pos.y <= surf + 0.02) {
+    if (c.air) { if (vy < -8 || Math.abs(c.rollA) > 0.55 || c.pitchA < -0.28) planeCrash(c, 'CRASH LANDING!'); else if (c.driver === 'player') toast(onWater ? 'SPLASHDOWN' : 'TOUCHDOWN', '#29f0ff'); }
+    c.pos.y = surf; c.air = false; c.pitchA = Math.max(c.pitchA, 0);
+    if (!onWater && v > 8 && c.wasWater !== false) { /* rolling on land: floats scrape */ v *= Math.exp(-0.9 * dt); }
+  } else if (c.pos.y > surf + 0.6) c.air = true;
+  c.wasWater = onWater; c.pos.y = Math.min(c.pos.y, 900);
+  if (Math.abs(c.pos.x) > -X0 - 30 || Math.abs(c.pos.z) > -X0 - 30) { c.heading = wrapAngle(c.heading + Math.PI * dt); }
+  if (!c.dead) forBuildingsNear(c.pos.x, c.pos.z, 5, (b) => { if (circleAABB(c.pos.x, c.pos.z, 2.6, b) && c.pos.y + 1 < (b.y0 || 0) + (b.h || 0) && (b.h || 0) < 90) planeCrash(c, 'CRASHED INTO A BUILDING!'); });
+  c.speedA = v; c.vf = v; c.vel.set(Math.sin(c.heading) * v * ch, Math.cos(c.heading) * v * ch); c.angVel = 0; c.slip = 0; c.drifting = false; c.inWater = false;
+  c.throttle = c.power; c.braking = false; c.pitch = 0; c.roll = 0;
+}
+function planeVisual(c, dt) {
+  if (!c.air && !c.dead) c.pos.y = damp(c.pos.y, Math.max(seabedY(c.pos.x, c.pos.z), WATER_Y - 0.05) + (seabedY(c.pos.x, c.pos.z) < WATER_Y - 0.4 ? Math.sin(G.time * 1.6 + c.id) * 0.05 - 0.2 : 0), 8, dt);
+  if (c.dead && !c.air) { c.sinkT = (c.sinkT || 0) + dt; if (seabedY(c.pos.x, c.pos.z) < WATER_Y - 1) c.pos.y = WATER_Y - 0.2 - Math.min(c.sinkT * 0.3, 3); }
+  if (c.dead && c.air) { c.pos.y -= 18 * dt; if (c.pos.y < Math.max(seabedY(c.pos.x, c.pos.z), WATER_Y)) c.air = false; }
+  c.group.position.copy(c.pos); c.group.rotation.set(-c.pitchA, c.heading, c.rollA, 'YXZ'); c.body.rotation.set(0, 0, 0);
+  if (c.prop) c.prop.rotation.z += dt * (6 + c.power * 60);
+  c.tailMat.emissiveIntensity = 1 + Math.floor(G.time * 2 + c.id) % 2 * 3;
+}
+// ---------- parked boats & seaplanes at marinas (persist near the player) ----------
+const MARINAS = [
+  { id: 'vice_pier', x: -1080, z: 945, types: ['speedboat', 'jetboat'] },
+  { id: 'vice_beach', x: 430, z: 160, types: ['jetboat', 'seaplane'] },
+  { id: 'port', x: 900, z: -1500, types: ['fishboat', 'speedboat', 'seaplane'] },
+  { id: 'solana', x: -1880, z: 1330, types: ['speedboat'] },
+];
+const VSPOTS = [];
+function initMarinas() {
+  for (const M of MARINAS) { let a = 0; for (const t of M.types) { const w = findWaterNear(M.x + Math.sin(a) * 14, M.z + Math.cos(a) * 14, CAR_TYPES[t].plane ? 3.2 : 2.4, 4); a += 2.1; if (!w) { console.warn('[marina] no water', M.id); continue; } VSPOTS.push({ id: M.id + ':' + t, type: t, x: w.x, z: w.z, h: w.h + Math.PI / 2, car: null }); } }
+}
+function updateVehicleSpots() {
+  const p = playerWorldPos();
+  for (const S of VSPOTS) {
+    if (S.car && !cars.includes(S.car)) S.car = null;
+    const d = Math.hypot(S.x - p.x, S.z - p.z);
+    if (!S.car && d < 320 && d > 25 && !(S.prisonOnly && !JAIL.active)) { const c = spawnCar(S.type, S.x, S.z, S.h, null, S.type === 'seaplane' ? '#ffffff' : undefined); c.persist = S.id; S.car = c; if (CAR_TYPES[S.type].boat || CAR_TYPES[S.type].plane) c.pos.y = WATER_Y; }
+  }
+}
+MINI_EXTRAS.push((blip, p) => { for (const S of VSPOTS) if (S.car && !S.car.dead && S.car !== player.car && Math.hypot(S.x - p.x, S.z - p.z) < 300) blip(S.car.pos.x, S.car.pos.z, CAR_TYPES[S.type].plane ? '#ffd23b' : '#29f0ff', 3.5, CAR_TYPES[S.type].plane ? 'P' : 'B'); });
+MAP_EXTRAS.push((pt, P, g, s) => { const seen = new Set(); for (const S of VSPOTS) { const k = S.id.split(':')[0]; if (seen.has(k)) continue; seen.add(k); pt(S.x, S.z, 5, '#29f0ff', 'MARINA'); } });
+function vehHint() {
+  const c = player.car; if (!c) return null;
+  if (c.spec.plane) return (TOUCH.on ? 'Stick: <b>bank</b> / <b>pitch</b> &nbsp; <b>JUMP</b> cut throttle' : '<b>W/S</b> throttle &nbsp; <b>A/D</b> bank &nbsp; <b>SPACE</b> pull up &nbsp; <b>SHIFT</b> dive') + ' &nbsp; ALT ' + Math.max(0, Math.round(c.pos.y - Math.max(seabedY(c.pos.x, c.pos.z), WATER_Y))) + ' m • THR ' + Math.round(c.power * 100) + '%';
+  if (c.spec.boat && c.speed < 2) return TOUCH.on ? 'Stick: throttle / steer &nbsp; <b>JUMP</b> power-slide' : '<b>W/S</b> throttle &nbsp; <b>A/D</b> steer &nbsp; <b>SPACE</b> power-slide';
+  return null;
+}
+initMarinas();
+function updateV5b(dt) { updateVehicleSpots(); if (typeof v5bUpdate === 'function') v5bUpdate(dt); }
+// =====================================================================
+//  v5b OPS: framework, touch-friendly hacking minigame, Rock Island jailbreak,
+//  Vice National Bank heist, the fixer contact. (partM = empire, partN = wardrobe)
+// =====================================================================
+G.v5b = G.v5b || { ops: {}, emp: null, ward: null };
+const OPS = { id: null, stage: 0, title: '', obj: '', css: '#ffd23b', timer: 0, ents: [], d: {}, markers: [] };
+GANGS.warden = { name: 'Rock Island Guards', color: '#3a4a66', css: '#8ea0b8', car: '#223', weapon: 'smg', style: 'aggressive', skill: 0.62, rate: [0.7, 1.2], hp: 95 };
+GANGS.security = { name: 'Bank Security', color: '#1b2233', css: '#4fb0ff', car: '#223', weapon: 'pistol', style: 'aggressive', skill: 0.6, rate: [0.9, 1.4], hp: 90 };
+const JAIL = { active: false };
+function opsFree() { if (OPS.id || mission.active || WAR.active || BOUNTY.active) { toast('FINISH YOUR CURRENT JOB FIRST', '#ff5050'); return false; } return true; }
+function opsBegin(id, title, css) { Object.assign(OPS, { id, stage: 0, title, css, obj: '', timer: 0, ents: [], d: {}, t0: G.time }); }
+function opsMarker(spec) { const m = addPlaceMarker(Object.assign({ onFoot: true }, spec)); PLACES.push(m); OPS.markers.push(m); return m; }
+function opsClearMarkers() { for (const m of OPS.markers) { scene.remove(m.g); const i = PLACES.indexOf(m); if (i >= 0) PLACES.splice(i, 1); } OPS.markers.length = 0; }
+function opsCleanup() {
+  opsClearMarkers(); for (const q of OPS.ents) if (q.remove) q.remove(); OPS.ents = []; JAIL.active = false;
+  if (OPS.d.van && !OPS.d.van.dead && cars.includes(OPS.d.van) && OPS.d.van !== player.car) OPS.d.van.persist = false;
+  clearWaypoint(); if (HACK.active) HACK.abort();
+}
+function opsEnd(pass, sub, reward) {
+  const id = OPS.id; if (!id) return;
+  if (pass) { const o = G.v5b.ops; o[id] = (o[id] || 0) + 1; G.cash += reward || 0; G.respect = (G.respect || 0) + (OPS.d.respect || 5); bigMessage(OPS.title.replace(/^[A-Z]+: /, '') + ' COMPLETE', sub || ('+$' + (reward || 0).toLocaleString()), '#3bff8a', 4); audio.chime([76, 83, 88, 95], 0.09, 'square', 0.15); setTimeout(() => saveGame('manual'), 50); }
+  else { bigMessage((id === 'jailbreak' ? 'BREAKOUT' : 'HEIST') + ' FAILED', sub || '', '#ff3b5c', 3); audio.chime([67, 63, 60], 0.15, 'sawtooth', 0.12); }
+  opsCleanup(); OPS.id = null; OPS.title = ''; OPS.obj = '';
+}
+function opsFail(why) { if (OPS.id) opsEnd(false, why); }
+function opsDist(x, z) { const p = playerWorldPos(); return Math.hypot(p.x - x, p.z - z); }
+const opsDone = (id) => (G.v5b.ops[id] || 0);
+
+// ---------------------------------------------------------------------
+//  HACKING MINIGAME — "BREACH PROTOCOL": watch the pad sequence, repeat it.
+//  Big pads (touch/mouse tap) or number keys 1-9. 3 strikes / time limit.
+// ---------------------------------------------------------------------
+{
+  const st = document.createElement('style');
+  st.textContent = `#hackUI{position:fixed;inset:0;z-index:48;display:none;align-items:center;justify-content:center;background:rgba(0,8,14,.72);font-family:'Courier New',monospace;color:#29f0ff;touch-action:none;user-select:none}
+#hackUI.on{display:flex}#hackBox{width:min(92vw,420px);padding:16px 18px;border:2px solid #29f0ff;border-radius:10px;background:rgba(2,16,24,.94);box-shadow:0 0 30px #29f0ff66,inset 0 0 24px #29f0ff22;text-align:center}
+#hackT{font-size:20px;letter-spacing:4px;font-weight:900;text-shadow:0 0 10px #29f0ff}#hackS{font-size:13px;margin:4px 0 8px;color:#9fe;min-height:16px}
+#hackBar{height:8px;background:#0a2a34;border-radius:4px;overflow:hidden;margin-bottom:10px}#hackBar i{display:block;height:100%;width:100%;background:#29f0ff;box-shadow:0 0 8px #29f0ff}
+#hackGrid{display:grid;gap:8px;margin:0 auto;max-width:330px}.hpad{aspect-ratio:1;min-height:58px;border:2px solid #29f0ff88;border-radius:8px;background:#06303a;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#29f0ff66;cursor:pointer;transition:background .08s,box-shadow .08s}
+.hpad.lit{background:#29f0ff;color:#012;box-shadow:0 0 24px #29f0ff}.hpad.bad{background:#ff3b5c;color:#fff;box-shadow:0 0 24px #ff3b5c}.hpad.ok{background:#3bff8a;color:#012}
+#hackDots{margin-top:10px;font-size:16px;letter-spacing:6px}#hackX{margin-top:8px;font-size:12px;color:#7ab}`;
+  document.head.appendChild(st);
+}
+const HACK = {
+  active: false, el: null, grid: null, seq: [], round: 0, rounds: 3, pads: 6, strikes: 0, phase: 'idle', idx: 0, t: 0, time: 40, left: 0, showI: 0, showT: 0, opts: null, results: { win: 0, fail: 0 },
+  build() {
+    if (this.el) return; const el = document.createElement('div'); el.id = 'hackUI';
+    el.innerHTML = '<div id="hackBox"><div id="hackT">BREACH PROTOCOL</div><div id="hackS"></div><div id="hackBar"><i></i></div><div id="hackGrid"></div><div id="hackDots"></div><div id="hackX">Repeat the flashing sequence \u2022 tap the pads or press 1-9 \u2022 ESC to abort</div></div>';
+    document.body.appendChild(el); this.el = el; this.grid = el.querySelector('#hackGrid');
+    el.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+  },
+  start(o) {
+    this.build(); if (this.active) return; this.opts = o; this.pads = o.pads || 6; this.rounds = o.rounds || 3; this.time = o.time || 40; this.left = this.time; this.strikes = 0; this.round = 0;
+    this.el.querySelector('#hackT').textContent = o.title || 'BREACH PROTOCOL'; this.grid.innerHTML = ''; this.grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+    for (let i = 0; i < this.pads; i++) { const b = document.createElement('div'); b.className = 'hpad'; b.textContent = String(i + 1); b.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); TOUCH.lastT = performance.now(); this.tap(i); }); this.grid.appendChild(b); }
+    this.active = true; G.talking = true; UI.open = 'hack'; mouse.down = false; this.el.classList.add('on'); if (document.pointerLockElement) document.exitPointerLock();
+    this.seq = []; this.nextRound(); this.drawDots();
+  },
+  nextRound() { this.round++; const len = 2 + this.round + (this.pads > 6 ? 1 : 0); this.seq = []; for (let i = 0; i < len; i++) this.seq.push(Math.floor(Math.random() * this.pads)); this.replay(); },
+  replay() { this.phase = 'show'; this.idx = 0; this.showI = -1; this.showT = 0.7; this.setStatus('WATCH THE SEQUENCE  \u2022  ROUND ' + this.round + '/' + this.rounds); },
+  setStatus(t) { this.el.querySelector('#hackS').textContent = t; },
+  pad(i) { return this.grid.children[i]; },
+  flash(i, cls, ms) { const p = this.pad(i); if (!p) return; p.classList.add(cls); setTimeout(() => p.classList.remove(cls), ms); },
+  drawDots() { this.el.querySelector('#hackDots').textContent = '\u25CF'.repeat(3 - this.strikes) + '\u25CB'.repeat(this.strikes) + '   ' + 'R' + this.round + '/' + this.rounds; },
+  tap(i) {
+    if (!this.active || this.phase !== 'input') return;
+    if (i === this.seq[this.idx]) {
+      this.flash(i, 'ok', 160); audio.chime([84 + this.idx], 0.05, 'square', 0.1); this.idx++;
+      if (this.idx >= this.seq.length) { if (this.round >= this.rounds) { this.phase = 'done'; this.setStatus('ACCESS GRANTED'); setTimeout(() => this.finish(true), 350); } else { this.phase = 'wait'; this.setStatus('ROUND CLEARED'); setTimeout(() => { if (this.active) this.nextRound(); }, 500); } }
+    } else {
+      this.strikes++; this.flash(i, 'bad', 260); audio.chime([50], 0.1, 'sawtooth', 0.15); this.drawDots();
+      if (this.strikes >= 3) { this.phase = 'done'; this.setStatus('ACCESS DENIED'); setTimeout(() => this.finish(false), 450); } else { this.phase = 'wait'; this.setStatus('WRONG PAD \u2014 STRIKE ' + this.strikes + '/3'); setTimeout(() => { if (this.active) this.replay(); }, 600); }
+    }
+  },
+  tick(dt) {
+    if (!this.active) return; this.left -= dt; this.el.querySelector('#hackBar i').style.width = Math.max(0, this.left / this.time * 100) + '%';
+    if (this.left <= 0 && this.phase !== 'done') { this.phase = 'done'; this.setStatus('TIME EXPIRED'); setTimeout(() => this.finish(false), 350); return; }
+    if (this.phase === 'show') { this.showT -= dt; if (this.showT <= 0) { this.showI++; if (this.showI >= this.seq.length) { this.phase = 'input'; this.idx = 0; this.setStatus('YOUR TURN \u2014 REPEAT IT'); } else { this.flash(this.seq[this.showI], 'lit', 380); audio.chime([72 + this.seq[this.showI] * 2], 0.04, 'sine', 0.1); this.showT = 0.62; } } }
+    for (let k = 0; k < 9; k++) if (PRESSED['Digit' + (k + 1)] || PRESSED['Numpad' + (k + 1)]) this.tap(k);
+  },
+  finish(win) { if (!this.active) return; const o = this.opts; this.active = false; G.talking = false; UI.open = null; this.el.classList.remove('on'); this.results[win ? 'win' : 'fail']++; if (!TOUCH.on && G.state === 'playing' && !document.pointerLockElement) { try { requestLock(); } catch (e) { /* needs gesture */ } } if (o) (win ? o.onWin : o.onFail) && (win ? o.onWin() : o.onFail()); },
+  abort() { if (!this.active) return; this.finish(false); },
+  autoSolve() { // test helper: replay the answer instantly
+    if (!this.active) return false; this.phase = 'input'; this.idx = 0; let guard = 0; while (this.active && guard++ < 60) { if (this.phase !== 'input') { if (this.phase === 'wait') { this.nextRoundNow(); continue; } break; } for (const i of this.seq.slice()) this.tap(i); if (!this.active || this.phase === 'done') break; this.nextRoundNow(); }
+    return true;
+  },
+  nextRoundNow() { if (this.phase === 'wait' && this.active && this.idx >= this.seq.length) { this.nextRound(); this.phase = 'input'; this.idx = 0; } },
+};
+// ---------------------------------------------------------------------
+//  PRISON (Rock Island): gate, cell door, guards, escape boats
+// ---------------------------------------------------------------------
+const PRISON = (() => {
+  const I = ISLANDS[3], g = I.grect, x0 = g.x0 + 20, x1 = g.x1 - 20, z0 = g.z0 + 20, z1 = g.z1 - 20, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const cellZ = z0 + 40 + 2 * 55, cellX = cx - 30 - 35; // block C west face
+  return { x0, x1, z0, z1, cx, cz, gateX: x0, gateZ: cz, gateHalf: 6, cellX, cellZ, termGate: { x: x0 - 2.2, z: cz - 7.5 }, termCell: { x: cellX - 2.2, z: cellZ + 4.5 }, doorOpen: false, gateOpen: false, gateT: 0, cellT: 0, coll: null, g: null, panels: [], cellDoor: null };
+})();
+{
+  const g = new THREE.Group(); g.name = 'prisonOps'; scene.add(g); PRISON.g = g; g.visible = false;
+  const steel = new THREE.MeshStandardMaterial({ color: 0x4a5057, metalness: 0.6, roughness: 0.45 }), dark = new THREE.MeshStandardMaterial({ color: 0x1c2024, roughness: 0.7 });
+  for (const s of [-1, 1]) { const p = new THREE.Mesh(boxGeo, steel); p.scale.set(0.5, 5.2, PRISON.gateHalf); p.position.set(PRISON.gateX, 2.6, PRISON.gateZ + s * PRISON.gateHalf / 2); p.castShadow = true; g.add(p); p.userData.z0 = p.position.z; p.userData.s = s; PRISON.panels.push(p);
+    for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(boxGeo, dark); b.scale.set(0.62, 5.0, 0.12); b.position.set(0, 0, (k - 1.5) * 1.2); p.add(b); b.scale.set(1.3, 0.96, 0.02); } }
+  PRISON.coll = { minX: PRISON.gateX - 0.6, maxX: PRISON.gateX + 0.6, minZ: PRISON.gateZ - PRISON.gateHalf, maxZ: PRISON.gateZ + PRISON.gateHalf, h: 5.2, y0: -1 }; freeColliders.push(PRISON.coll);
+  const door = new THREE.Mesh(boxGeo, steel); door.scale.set(0.3, 3.0, 2.2); door.position.set(PRISON.cellX - 0.2, 1.6, PRISON.cellZ); g.add(door); PRISON.cellDoor = door;
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.7), new THREE.MeshBasicMaterial({ map: neonSignTex('CELL C-14', '#ff4040'), transparent: true })); sign.position.set(PRISON.cellX - 0.4, 3.6, PRISON.cellZ); sign.rotation.y = -Math.PI / 2; g.add(sign);
+  const mkTerm = (x, z, css) => { const t = new THREE.Mesh(boxGeo, dark); t.scale.set(0.5, 1.3, 0.9); t.position.set(x, 0.65, z); g.add(t); const s = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(css).multiplyScalar(2) })); s.scale.set(0.05, 0.5, 0.6); s.position.set(x + 0.28, 1.0, z); g.add(s); return s; };
+  PRISON.led1 = mkTerm(PRISON.termGate.x, PRISON.termGate.z, '#ff3030'); PRISON.led2 = mkTerm(PRISON.termCell.x, PRISON.termCell.z, '#ff3030');
+}
+function prisonOpenGate() { if (PRISON.gateOpen) return; PRISON.gateOpen = true; const i = freeColliders.indexOf(PRISON.coll); if (i >= 0) freeColliders.splice(i, 1); PRISON.led1.material.color.set(0x30ff60); }
+function prisonCloseGate() { PRISON.gateOpen = false; PRISON.gateT = 0; if (!freeColliders.includes(PRISON.coll)) freeColliders.push(PRISON.coll); PRISON.led1.material.color.set(0xff3030); PRISON.led2.material.color.set(0xff3030); PRISON.doorOpen = false; for (const p of PRISON.panels) p.position.z = p.userData.z0; PRISON.cellDoor.position.z = PRISON.cellZ; }
+function prisonSpawnGuards() {
+  const P = PRISON, spots = [[P.x0 + 8, P.cz - 9], [P.x0 + 8, P.cz + 9], [P.x0 + 20, P.cz], [P.cx - 55, P.cz - 5], [P.cx - 55, P.cz + 5], [P.cx - 8, P.cz], [P.cellX - 8, P.cellZ - 6], [P.cellX - 8, P.cellZ + 7], [P.cellX - 14, P.cellZ], [P.cx - 55, P.cellZ + 14]];
+  for (const [x, z] of spots) { const q = new Gangster('warden', null, x, z, { hostile: true }); q.guard = true; q.post = { x, z }; q.hp *= 0.9; peds.push(q); OPS.ents.push(q); }
+}
+class Ally extends Ped { // Lucky Reyes — follows the player, boards vehicles, can't be hurt
+  constructor(x, z) { super(false, { skin: '#c68642', shirt: '#ff8a1c', pants: '#ff8a1c', hair: '#111', shades: false }); this.ally = true; this.pos.set(x, groundY(x, z), z); this.h.group.position.copy(this.pos); this.hp = 1e6; this.spd = 0; this.boarded = false; this.name = 'Lucky Reyes'; }
+  remove() { const i = peds.indexOf(this); if (i >= 0) peds.splice(i, 1); scene.remove(this.h.group); }
+  shot() {} knock() {} scare() {}
+  update(dt) {
+    const g = this.h.group, p = playerWorldPos(), dx = p.x - this.pos.x, dz = p.z - this.pos.z, dist = Math.hypot(dx, dz);
+    if (this.boarded) { g.visible = false; if (!player.car) { this.boarded = false; g.visible = true; this.pos.set(p.x + 2.2, groundY(p.x + 2.2, p.z), p.z + 1); } this.pos.x = p.x; this.pos.z = p.z; return; }
+    if (player.car && dist < 11 && !player.car.dead && (player.car.spec.boat || player.car.spec.plane || player.car.speed < 25)) { this.boarded = true; g.visible = false; toast('REYES IS IN — GO GO GO!', '#ff8a1c'); return; }
+    let tx = this.pos.x, tz = this.pos.z, spd = 0;
+    if (dist > 3.2) { tx = p.x; tz = p.z; spd = dist > 12 ? 6.4 : 4.4; }
+    const mx = tx - this.pos.x, mz = tz - this.pos.z, ml = Math.hypot(mx, mz);
+    if (ml > 0.3 && spd > 0) { this.heading = dampAngle(this.heading, Math.atan2(mx, mz), 8, dt); const k = Math.min(spd * dt, ml); this.pos.x += mx / ml * k; this.pos.z += mz / ml * k; } else spd = 0;
+    pushOutStatic(this.pos, 0.3); this.pos.y = damp(this.pos.y, groundY(this.pos.x, this.pos.z), 15, dt);
+    this.spd = damp(this.spd, spd, 6, dt); this.phase += this.spd * dt * 2.4; g.position.copy(this.pos); g.rotation.y = this.heading; g.rotation.x = 0; animateHuman(this.h, this.phase, clamp(this.spd / 5, 0, 1.1), false, 0);
+  }
+}
+{ const w = [findWaterNear(PRISON.x0 - 70, PRISON.cz - 25, 2.4, 4), findWaterNear(PRISON.x0 - 70, PRISON.cz + 25, 2.4, 4)]; w.forEach((q, i) => { if (q) VSPOTS.push({ id: 'prison:' + i, type: i ? 'jetboat' : 'speedboat', x: q.x, z: q.z, h: q.h + Math.PI / 2, car: null, prisonOnly: true }); }); }
+// ---------- the Vice Beach fixer ----------
+const FIXER = { x: 284, z: 92 };
+{ const pl = addPlaceMarker({ id: 'fixer', name: 'THE FIXER (JOBS)', css: '#29f0ff', x: FIXER.x, z: FIXER.z, onFoot: true }); pl.v5b = () => openFixer(); PLACES.push(pl); FIXER.pl = pl; }
+const MARINA_BEACH = { x: 430, z: 160 };
+function openFixer() {
+  const o = G.v5b.ops, lines = [
+    'Psst. Looking for real money? I have two jobs on the books:',
+    (opsDone('jailbreak') ? '\u2714 ' : '\u27A4 ') + 'ROCK ISLAND BREAKOUT — free Lucky Reyes from the island prison. $' + (opsDone('jailbreak') ? 9000 : 18000).toLocaleString() + (opsDone('jailbreak') ? ' (repeat)' : ''),
+    (opsDone('heist') ? '\u2714 ' : '\u27A4 ') + 'HEIST: VICE NATIONAL — van, alarm, vault, getaway. $' + (opsDone('heist') ? 25000 : 50000).toLocaleString() + (opsDone('heist') ? ' (repeat)' : ''),
+    'Hacking: watch the pad sequence, repeat it. 3 strikes and you\u2019re out.'];
+  if (typeof empireSummary === 'function') lines.push(empireSummary());
+  openPanel('THE FIXER', lines, [['Breakout', () => { closePanel(); jailbreakStart(); }], ['Bank heist', () => { closePanel(); heistStart(); }], ['Practice hack', () => { closePanel(); HACK.start({ title: 'PRACTICE', rounds: 2, pads: 6, time: 30 }); }], ['Close', closePanel]]);
+}
+function v5bInteract() {
+  const pl = nearPlace(); if (pl && pl.v5b && ((pl.inCar && player.car) || (pl.onFoot && !player.car) || pl.anyMode)) { pl.v5b(pl); return true; }
+  return false;
+}
+// ---------------------------------------------------------------------
+//  JAILBREAK
+// ---------------------------------------------------------------------
+function jailbreakStart() {
+  if (!opsFree()) return;
+  opsBegin('jailbreak', 'BREAKOUT: ROCK ISLAND', '#ff8a1c'); JAIL.active = true; OPS.d.respect = 10; prisonCloseGate();
+  bigMessage('ROCK ISLAND BREAKOUT', 'Free Lucky Reyes \u2022 by sea or air', '#ff8a1c', 3.2);
+  OPS.d.stage = 0; setWaypoint(MARINA_BEACH.x, MARINA_BEACH.z, 'MARINA');
+}
+function jbStageTerminal(which) {
+  const T = which === 'gate' ? PRISON.termGate : PRISON.termCell;
+  opsMarker({ id: 'ops:term:' + which, name: which === 'gate' ? 'GATE CONTROL (HACK)' : 'CELL DOOR LOCK (HACK)', css: '#29f0ff', x: T.x, z: T.z, v5b: () => {
+    if (HACK.active) return;
+    HACK.start({ title: which === 'gate' ? 'GATE CONTROL' : 'CELL LOCK C-14', rounds: which === 'gate' ? 2 : 3, pads: which === 'gate' ? 6 : 9, time: which === 'gate' ? 40 : 45,
+      onWin: () => (which === 'gate' ? jbGateOpened() : jbCellOpened()), onFail: () => { toast('HACK FAILED — GUARDS ALERTED', '#ff3b5c'); for (const q of OPS.ents) if (q.guard) q.gstate = 'hostile'; if (wanted.level < 2) setWanted(2); } });
+  } });
+}
+function jbGateOpened() { prisonOpenGate(); toast('GATE OPEN — MOVE!', '#3bff8a'); OPS.d.stage = 2; opsClearMarkers(); jbStageTerminal('cell'); setWaypoint(PRISON.cellX - 3, PRISON.cellZ + 3, 'CELL C-14'); if (wanted.level < 2) setWanted(2); for (const q of OPS.ents) if (q.guard) q.gstate = 'hostile'; }
+function jbCellOpened() {
+  PRISON.doorOpen = true; PRISON.led2.material.color.set(0x30ff60); opsClearMarkers(); OPS.d.stage = 3; setWanted(Math.max(wanted.level, 3));
+  const r = new Ally(PRISON.cellX - 1.2, PRISON.cellZ); peds.push(r); OPS.ents.push(r); OPS.d.reyes = r; bigMessage('LUCKY REYES IS FREE', 'Get him off the island!', '#ff8a1c', 2.6);
+  setWaypoint(MARINA_BEACH.x, MARINA_BEACH.z, 'VICE MARINA'); OPS.d.escapeT = 0;
+  for (const S of VSPOTS) if (S.prisonOnly) { /* escape boats already stand by when JAIL.active */ }
+}
+function jailbreakUpdate(dt) {
+  const d = OPS.d, p = playerWorldPos(), gd = Math.hypot(p.x - PRISON.gateX, p.z - PRISON.gateZ);
+  // keep guards near their posts
+  for (const q of OPS.ents) if (q.guard && !q.dead && q.post && peds.includes(q)) { if (!q.goal || Math.hypot(q.goal.x - q.post.x, q.goal.z - q.post.z) > 9) q.goal = { x: q.post.x + rr(-5, 5), z: q.post.z + rr(-5, 5) }; }
+  if (d.stage === 0 || d.stage === undefined) {
+    d.stage = 0; const inV = player.car && (player.car.spec.boat || player.car.spec.plane);
+    if (inV || gd < 450) { d.stage = 1; prisonSpawnGuards(); jbStageTerminal('gate'); setWaypoint(PRISON.termGate.x, PRISON.termGate.z, 'GATE CONTROL'); toast('LAND ON THE WEST SHORE AND HACK THE GATE', '#ff8a1c'); }
+    OPS.obj = 'Take a boat or seaplane from the marina \u2022 ' + Math.round(opsDist(MARINA_BEACH.x, MARINA_BEACH.z)) + ' m';
+  } else if (d.stage === 1) OPS.obj = 'Hack the gate control box (west wall) \u2022 ' + Math.round(opsDist(PRISON.termGate.x, PRISON.termGate.z)) + ' m';
+  else if (d.stage === 2) OPS.obj = 'Reach cell block C and hack the cell lock \u2022 ' + Math.round(opsDist(PRISON.termCell.x, PRISON.termCell.z)) + ' m';
+  else if (d.stage === 3) {
+    const r = d.reyes; OPS.obj = (r && r.boarded ? 'Reyes is aboard' : 'Bring Reyes with you') + ' \u2022 reach Vice Marina \u2022 ' + Math.round(opsDist(MARINA_BEACH.x, MARINA_BEACH.z)) + ' m';
+    if (!r || !peds.includes(r)) return opsFail('Reyes was lost');
+    if (r.boarded && player.car && player.car.dead) return opsFail('The getaway ride was destroyed');
+    if (!r.boarded && opsDist(PRISON.cx, PRISON.cz) > 420 && Math.hypot(r.pos.x - p.x, r.pos.z - p.z) > 60) return opsFail('You left Reyes behind');
+    if (opsDist(MARINA_BEACH.x, MARINA_BEACH.z) < 55 && (r.boarded || Math.hypot(r.pos.x - p.x, r.pos.z - p.z) < 18)) { clearWanted(); opsEnd(true, 'Reyes is safe \u2022 +$' + (opsDone('jailbreak') ? 9000 : 18000).toLocaleString() + ' \u2022 +10 respect', opsDone('jailbreak') ? 9000 : 18000); }
+  }
+}
+// ---------------------------------------------------------------------
+//  BANK HEIST — Vice National Bank (a venue with a vault interior)
+// ---------------------------------------------------------------------
+const BANK = { V: null, bags: 0, vaultOpen: false, vaultDoor: null, bagMeshes: [] };
+INT_DEF.bank = { W: 26, D: 20, H: 5.5, amb: 1.15, wall: '#d6d1c4', floor: '#8c8e94' };
+INT_DEF.clothes = { W: 18, D: 14, H: 4.2, amb: 1.25, wall: '#efe8f2', floor: '#6a5a78' };
+INT_DEF.tattoo = { W: 16, D: 12, H: 4, amb: 0.8, wall: '#1c1626', floor: '#2a2230' };
+function interiorExtra(V, R, c) {
+  const { box, neon, counter, human, W, Dd } = c, ox = R.ox, oz = R.oz;
+  if (V.kind === 'bank') {
+    BANK.V = V; counter(0, 2, W - 10, 1.2, '#d8d0b8', '#4a3a2a'); box(0, 2.0, 1.4, W - 10, 1.8, 0.05, INTM.box('#9fd3e8', { r: 0.05, m: 0.2 }), false);
+    for (const s of [-1, 1]) box(s * (W / 2 - 3), 1.2, 4.5, 0.9, 2.4, 3, INTM.box('#3a4a3a'), true);
+    neon(0, 4.4, 5.5, 9, 0.16, 0.1, '#4fb0ff'); box(0, 2.4, 6.5, 0.9, 0.5, 0.05, INTM.box('#fff'));
+    human(-4, 3.3, 0, { skin: '#e0ac7e', shirt: '#1b2233', pants: '#111', hair: '#222' }, 'idle'); human(4, 3.3, 0, { skin: '#c68e6a', shirt: '#ffffff', pants: '#222', hair: '#331' }, 'idle');
+    // vault at the back wall
+    const vz = -Dd / 2 + 2.8; box(0, 2.4, -Dd / 2 + 0.3, 12, 4.8, 0.5, INTM.box('#555a62', { m: 0.5, r: 0.4 }), true);
+    for (const s of [-1, 1]) box(s * 6.2, 2.4, -Dd / 2 + 2.4, 0.5, 4.8, 4.6, INTM.box('#555a62', { m: 0.5, r: 0.4 }), true);
+    const door = box(0, 1.6, vz + 2, 4.4, 3.2, 0.5, INTM.box('#8a9099', { m: 0.8, r: 0.25 }), false); BANK.vaultDoor = door; BANK.vaultZ0 = door.position.z;
+    BANK.vaultColl = { minX: ox - 2.2, maxX: ox + 2.2, minZ: oz + vz + 2 - 0.4, maxZ: oz + vz + 2 + 0.4, h: 99, y0: -50 }; R.coll.push(BANK.vaultColl);
+    box(0, 0.5, -Dd / 2 + 1.3, 8, 1.0, 1.2, INTM.box('#2a3a2a', { m: 0.2 }), false);
+    for (let i = 0; i < 3; i++) { const bx = -2.5 + i * 2.5; const bag = box(bx, 1.3, -Dd / 2 + 1.5, 0.9, 0.7, 0.7, INTM.box('#3a8a4a', { r: 0.8, e: '#3bff8a', ei: 0.4 }), false); BANK.bagMeshes.push(bag);
+      R.acts.push({ x: ox + bx, z: oz - Dd / 2 + 2.6, r: 1.8, get label() { return BANK.bags > i || !(OPS.id === 'heist' && OPS.d.stage >= 5) ? 'Cash bag' + (BANK.bags > i ? ' (taken)' : ' (vault locked)') : 'Grab the cash bag'; }, fn: () => heistGrab(i) }); }
+    R.acts.push({ x: ox, z: oz + vz + 3.4, r: 2.6, get label() { return BANK.vaultOpen ? 'Vault (open)' : OPS.id === 'heist' && OPS.d.stage >= 4 ? 'Crack the vault (hack)' : 'Vault door (locked)'; }, fn: () => heistVaultAct() });
+  } else if (V.kind === 'clothes') {
+    counter(W / 2 - 3, -Dd / 2 + 2, 4, 1.2, '#e8d8f0', '#3a2a4a'); neon(0, 3.6, -Dd / 2 + 0.12, 8, 0.14, 0.08, '#ff4fd8');
+    for (let i = 0; i < 5; i++) { const x = -W / 2 + 2.2 + i * 2.6; box(x, 1.0, -Dd / 2 + 1.0, 0.1, 2.0, 0.1, INTM.box('#bbb', { m: 0.8 }), false); box(x, 1.7, -Dd / 2 + 1.0, 2.0, 0.08, 0.08, INTM.box('#bbb', { m: 0.8 }), false); for (let k = 0; k < 4; k++) box(x - 0.7 + k * 0.46, 1.2, -Dd / 2 + 1.0, 0.4, 0.9, 0.12, INTM.box(['#ff4fd8', '#29f0ff', '#ffd23b', '#ffffff', '#b44bff', '#3bff8a'][(i * 4 + k) % 6]), false); }
+    human(-W / 2 + 3, 1.5, Math.PI * 0.8, { skin: '#d8d8d8', shirt: '#ff4fd8', pants: '#222', hair: '#222' }, 'idle'); human(-W / 2 + 6, 2.5, Math.PI * 1.1, { skin: '#d8d8d8', shirt: '#29f0ff', pants: '#f4f4f4', hair: '#222' }, 'idle');
+    box(W / 2 - 1.2, 1.4, 2.5, 0.12, 2.6, 2.4, INTM.box('#bfe8ff', { m: 0.9, r: 0.05 }), false); // mirror
+    R.acts.push({ x: ox, z: oz + 1, r: 3.6, label: 'Browse clothes & accessories', fn: () => openWardrobe('shop') });
+  } else if (V.kind === 'tattoo') {
+    counter(W / 2 - 3, -Dd / 2 + 2, 3.5, 1.2, '#222', '#120d1a'); neon(0, 3.3, -Dd / 2 + 0.12, 7, 0.14, 0.08, '#ff2b6b'); neon(-W / 2 + 0.1, 2.6, 0, 0.1, 0.12, 6, '#29f0ff');
+    box(0, 0.5, -1, 1.4, 1.0, 2.4, INTM.box('#111', { m: 0.3 }), true); box(0, 1.05, -1, 1.5, 0.12, 2.5, INTM.box('#3a1a2a', { r: 0.4 }), false);
+    human(3.5, -Dd / 2 + 1.5, 0, { skin: '#8a5a3a', shirt: '#111', pants: '#222', hair: '#000', shades: true }, 'idle');
+    for (let i = 0; i < 6; i++) box(-W / 2 + 1.5 + i * 1.6, 2.2, -Dd / 2 + 0.2, 1.3, 1.5, 0.05, INTM.box(['#ff2b6b', '#29f0ff', '#ffd23b', '#b44bff', '#3bff8a', '#ff8a1c'][i], { e: ['#ff2b6b', '#29f0ff', '#ffd23b', '#b44bff', '#3bff8a', '#ff8a1c'][i], ei: 0.6 }), false);
+    R.acts.push({ x: ox, z: oz - 1, r: 3.2, label: 'Get a tattoo', fn: () => openWardrobe('tattoo') });
+  }
+}
+function heistStart() {
+  if (!opsFree()) return; const V = VENUES.find((v) => v.id === 'bank'); if (!V || V.bad) { toast('THE BANK IS NOT AVAILABLE', '#ff5050'); return; }
+  opsBegin('heist', 'HEIST: VICE NATIONAL', '#29f0ff'); OPS.d.respect = 12; BANK.bags = 0; heistResetVault();
+  const van = spawnCar('van', 270.6, 104, Math.PI, null, '#f2f2f2'); van.persist = 'heist'; OPS.d.van = van; OPS.d.stage = 0;
+  bigMessage('HEIST: VICE NATIONAL', 'Van \u2022 alarm \u2022 vault \u2022 getaway', '#29f0ff', 3.2); setWaypoint(van.pos.x, van.pos.z, 'CREW VAN');
+}
+function heistResetVault() { BANK.vaultOpen = false; if (BANK.vaultDoor) BANK.vaultDoor.position.z = BANK.vaultZ0; if (BANK.vaultColl && INT.cur && INT.cur.coll.includes(BANK.vaultColl) && !freeColliders.includes(BANK.vaultColl)) freeColliders.push(BANK.vaultColl); for (const b of BANK.bagMeshes) b.visible = true; }
+function heistVaultAct() {
+  if (!(OPS.id === 'heist' && OPS.d.stage === 4)) { toast(BANK.vaultOpen ? 'THE VAULT IS OPEN' : 'LOCKED — ' + (OPS.id === 'heist' ? 'ALARM FIRST' : 'ask the fixer about a job'), '#ffb23b'); return; }
+  if (HACK.active) return;
+  HACK.start({ title: 'VAULT LOCK', rounds: 3, pads: 9, time: 45, onWin: () => { BANK.vaultOpen = true; const i = freeColliders.indexOf(BANK.vaultColl); if (i >= 0) freeColliders.splice(i, 1); OPS.d.stage = 5; setWanted(Math.max(wanted.level, 3)); bigMessage('VAULT OPEN', 'Silent alarm tripped \u2014 grab the cash!', '#3bff8a', 2.4); },
+    onFail: () => { toast('LOCKOUT — ALARM RINGING', '#ff3b5c'); setWanted(Math.max(wanted.level, 2)); } });
+}
+function heistGrab(i) {
+  if (!(OPS.id === 'heist' && OPS.d.stage === 5) || !BANK.vaultOpen) return toast('THE VAULT IS LOCKED', '#ffb23b'); if (BANK.bags > i) return;
+  BANK.bags++; BANK.bagMeshes[i].visible = false; cashSound(); toast('CASH BAG ' + BANK.bags + '/3  +$4,000', '#3bff8a'); G.cash += 4000; OPS.d.loot = (OPS.d.loot || 0) + 4000;
+  if (BANK.bags >= 3) { OPS.d.stage = 6; toast('GET OUT! HEAD FOR THE CHOP SHOP', '#ff3b5c'); const f = placeById('fence'); setWaypoint(f.x, f.z, 'CHOP SHOP'); }
+}
+function heistUpdate(dt) {
+  const d = OPS.d, V = BANK.V || VENUES.find((v) => v.id === 'bank'), p = playerWorldPos(); if (!V) return;
+  if (d.van && d.stage <= 2 && !cars.includes(d.van) && !d.vanLost) { d.vanLost = true; return opsFail('The crew van was lost'); }
+  if (d.stage === 0) { OPS.obj = 'Steal the white crew van on Ocean Drive \u2022 ' + Math.round(opsDist(d.van.pos.x, d.van.pos.z)) + ' m'; if (player.car === d.van) { d.stage = 1; setWaypoint(V.door.x, V.door.z, 'VICE NATIONAL BANK'); toast('DRIVE TO THE BANK', '#29f0ff'); } }
+  else if (d.stage === 1) { OPS.obj = 'Drive the van to Vice National Bank \u2022 ' + Math.round(opsDist(V.door.x, V.door.z)) + ' m'; if (opsDist(V.door.x, V.door.z) < 28) { d.stage = 2; const fx = Math.sin(V.door.ry), fz = Math.cos(V.door.ry), dx = V.door.x + fx * 0.5 + fz * 4.5, dz = V.door.z + fz * 0.5 - fx * 4.5;
+      opsMarker({ id: 'ops:alarm', name: 'ALARM PANEL (HACK)', css: '#29f0ff', x: dx, z: dz, v5b: () => { if (HACK.active) return; HACK.start({ title: 'ALARM PANEL', rounds: 2, pads: 6, time: 35, onWin: () => { d.stage = 3; opsClearMarkers(); toast('ALARM DISABLED \u2014 GO IN', '#3bff8a'); setWaypoint(V.door.x, V.door.z, 'BANK ENTRANCE'); }, onFail: () => { toast('ALARM TRIPPED!', '#ff3b5c'); setWanted(Math.max(wanted.level, 2)); } }); } });
+      setWaypoint(dx, dz, 'ALARM PANEL'); toast('LEAVE THE VAN AND HACK THE ALARM PANEL', '#29f0ff'); } }
+  else if (d.stage === 2) OPS.obj = 'Hack the alarm panel by the door \u2022 ' + (player.car ? 'get out of the van' : Math.round(opsDist(OPS.markers[0] ? OPS.markers[0].x : V.door.x, OPS.markers[0] ? OPS.markers[0].z : V.door.z)) + ' m');
+  else if (d.stage === 3) { OPS.obj = 'Enter the bank (south-facing door)'; if (INT.cur && INT.cur.V === V) { d.stage = 4; clearWaypoint(); toast('CRACK THE VAULT AT THE BACK', '#29f0ff'); } }
+  else if (d.stage === 4) OPS.obj = 'Crack the vault door at the back of the bank';
+  else if (d.stage === 5) { OPS.obj = 'Grab the cash bags ' + BANK.bags + '/3'; }
+  else if (d.stage === 6) {
+    const f = placeById('fence'); OPS.obj = INT.cur ? 'Get out of the bank!' : 'Reach the chop shop to unload \u2022 ' + Math.round(opsDist(f.x, f.z)) + ' m \u2022 wanted ' + wanted.level + '\u2605';
+    if (!INT.cur && opsDist(f.x, f.z) < 14 && player.car) { const bonus = (d.loot || 0), pay = opsDone('heist') ? 25000 : 50000; clearWanted(); opsEnd(true, '+$' + pay.toLocaleString() + ' payout (+$' + bonus.toLocaleString() + ' cash bags)', pay); }
+  }
+}
+// ---------------------------------------------------------------------
+//  per-frame hooks (called from updateV5b)
+// ---------------------------------------------------------------------
+function v5bUpdate(dt) {
+  HACK.tick(dt);
+  const pg = PRISON.g; const near = opsDist(PRISON.cx, PRISON.cz) < 900; pg.visible = near;
+  if (near) {
+    if (PRISON.gateOpen) { PRISON.gateT = Math.min(1, PRISON.gateT + dt * 0.5); for (const p of PRISON.panels) p.position.z = p.userData.z0 + p.userData.s * PRISON.gateHalf * 0.95 * PRISON.gateT; }
+    if (PRISON.doorOpen) { PRISON.cellT = Math.min(1, PRISON.cellT + dt * 0.7); PRISON.cellDoor.position.z = PRISON.cellZ + 2.1 * PRISON.cellT; } else PRISON.cellT = 0;
+  }
+  if (OPS.id === 'jailbreak') jailbreakUpdate(dt); else if (OPS.id === 'heist') heistUpdate(dt);
+  if (OPS.id && G.state === 'playing' && OPS.id !== 'jailbreak') { /* heist has no timer */ }
+  if (typeof empireUpdate === 'function') empireUpdate(dt);
+  if (typeof wardrobeUpdate === 'function') wardrobeUpdate(dt);
+}
+function v5bSave() {
+  return { ops: G.v5b.ops || {}, emp: typeof empireSave === 'function' ? empireSave() : null, ward: typeof wardrobeSave === 'function' ? wardrobeSave() : null };
+}
+function v5bLoad(d) {
+  G.v5b.ops = d.ops || {}; if (typeof empireLoad === 'function') empireLoad(d.emp || null); if (typeof wardrobeLoad === 'function') wardrobeLoad(d.ward || null);
+}
+// =====================================================================
+//  v5b EMPIRE: buy properties & businesses, passive income, gang-turf hooks (partK / partZ turf wars),
+//  rival raids, illicit "back-room" businesses. Saved in the v5b block of the save (v3).
+// =====================================================================
+const PROPS = [
+  { id: 'condo', name: 'OCEAN DRIVE CONDO', kind: 'legit', price: 45000, at: [275.6, -140], css: '#29f0ff', res: 0 },
+  { id: 'carwash', name: 'PALM CAR WASH', kind: 'legit', price: 30000, near: [-120, 80], css: '#29f0ff', res: 0 },
+  { id: 'arcade', name: 'NEON ARCADE', kind: 'legit', price: 60000, at: [275.6, 190], css: '#ff4fd8', res: 3 },
+  { id: 'taco', name: 'BEACH TACO STAND', kind: 'legit', price: 18000, at: [289, -60], css: '#ffb23b', res: 0 },
+  { id: 'cigar', name: 'HAVANA CIGAR LOUNGE (BACK ROOM)', kind: 'illicit', price: 55000, turf: 'Little Havana West', css: '#2bd94a', res: 8 },
+  { id: 'garage', name: 'DOWNTOWN PARKING GARAGE', kind: 'legit', price: 90000, turf: 'Downtown North', css: '#ffd23b', res: 6 },
+  { id: 'depot', name: 'CONTAINER YARD DEPOT', kind: 'illicit', price: 140000, turf: 'Container City', css: '#ff7a2b', res: 15 },
+  { id: 'fish', name: 'KELLER WHARF FISH MARKET', kind: 'legit', price: 70000, turf: 'Keller Wharf', css: '#ffd23b', res: 5 },
+  { id: 'salvage', name: 'DRY DOCK SALVAGE', kind: 'legit', price: 110000, turf: 'Dry Docks', css: '#ff7a2b', res: 10 },
+  { id: 'pharm', name: 'HEIGHTS PHARMACY (FRONT)', kind: 'illicit', price: 95000, turf: 'Solana Heights', css: '#b44bff', res: 12 },
+  { id: 'lab', name: 'CANYON ROW LAB', kind: 'illicit', price: 160000, turf: 'Canyon Row', css: '#b44bff', res: 20 },
+  { id: 'market', name: 'HILLSIDE VILLAGE MARKET', kind: 'legit', price: 60000, turf: 'Hillside Village', css: '#2bd94a', res: 4 },
+  { id: 'marina', name: 'KELLER MARINA', kind: 'legit', price: 180000, near: [960, -1500], css: '#29f0ff', res: 25 },
+];
+const EMP = { own: {}, raid: null, rt: 0, ready: false };
+function sidewalkNear(x, z) {
+  const [i0, j0] = nearestNode(x, z);
+  for (let r = 0; r < 9; r++) for (let di = -r; di <= r; di++) for (let dj = -r; dj <= r; dj++) {
+    if (Math.max(Math.abs(di), Math.abs(dj)) !== r) continue; const i = i0 + di, j = j0 + dj;
+    if (!walkB(i, j) || !walkB(i - 1, j) || !walkB(i, j - 1) || !walkB(i - 1, j - 1)) continue; const px = nodeX(i) + 9.5, pz = nodeX(j) + 9.5; if (groundY(px, pz) < -0.2) continue; return { x: px, z: pz };
+  }
+  return { x, z };
+}
+const PROP_TURF = (P) => (P.turf ? TERRITORIES.find((t) => t.name === P.turf) : null);
+const turfMine = (P) => !!(P.turf && G.collect && G.collect.turf && G.collect.turf[P.turf]);
+function propRate(P) { // $ per game hour
+  const o = EMP.own[P.id]; if (!o) return 0; let r = P.price * 0.012 * (1 + 0.6 * (o.lvl - 1)); if (P.kind === 'illicit') r *= 1.8; if (P.turf) r *= turfMine(P) ? 1.5 : 0.65; return Math.round(r);
+}
+const propCap = (P) => propRate(P) * 72;
+for (const P of PROPS) {
+  let pt; if (P.at) pt = { x: P.at[0], z: P.at[1] }; else if (P.turf) { const t = PROP_TURF(P), [a, b, c, d] = polyBounds(t.poly); pt = sidewalkNear((a + c) / 2 - 20, (b + d) / 2 + 20); } else pt = sidewalkNear(P.near[0], P.near[1]);
+  P.x = pt.x; P.z = pt.z; P.pl = addPlaceMarker({ id: 'prop:' + P.id, name: P.name + ' \u2014 FOR SALE', css: P.css, x: P.x, z: P.z, onFoot: true }); P.pl.v5b = () => openProperty(P); PLACES.push(P.pl);
+  const g = P.pl.g, pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 5, 6), new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.7, roughness: 0.4 })); pole.position.set(0.9, 2.5, 0); g.add(pole);
+  P.flag = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0xff3b3b })); P.flag.scale.set(1.5, 0.8, 0.04); P.flag.position.set(1.65, 4.5, 0); g.add(P.flag);
+}
+function refreshPropMarker(P) {
+  const o = EMP.own[P.id]; P.flag.material.color.set(o ? 0x3bff8a : 0xff3b3b);
+  const sp = P.pl.g.children.find((c) => c.isSprite); if (sp) { if (sp.material.map && sp.material.map.dispose) sp.material.map.dispose(); sp.material.map = labelTex(o ? P.name + ' \u2714 OWNED' : P.name + ' \u2014 FOR SALE', o ? '#3bff8a' : P.css); sp.material.needsUpdate = true; }
+  P.pl.name = o ? P.name + ' (OWNED)' : P.name + ' \u2014 FOR SALE';
+}
+function empireStats() { let n = 0, rate = 0, stash = 0; for (const P of PROPS) { const o = EMP.own[P.id]; if (!o) continue; n++; rate += propRate(P); stash += Math.floor(o.stash); } return { n, rate, stash }; }
+function empireSummary() { const s = empireStats(); return s.n ? 'EMPIRE: ' + s.n + ' properties \u2022 $' + s.rate.toLocaleString() + '/game-hour \u2022 $' + s.stash.toLocaleString() + ' waiting to collect' : 'EMPIRE: you own nothing yet \u2014 look for FOR SALE flags around the islands.'; }
+function openProperty(P) {
+  const o = EMP.own[P.id], t = PROP_TURF(P), mine = turfMine(P), lines = [];
+  if (!o) {
+    lines.push(P.kind === 'illicit' ? 'A discreet business with a back room. Pays ' + '1.8x' + ' but the gangs want a cut.' : 'A solid legit business. Steady passive income.');
+    lines.push('Price $' + P.price.toLocaleString() + ' \u2022 income ~$' + Math.round(P.price * 0.012 * (P.kind === 'illicit' ? 1.8 : 1) * (t ? 0.65 : 1)).toLocaleString() + '/game-hour' + (t ? ' (protection tax to ' + GANGS[t.gang].name + ')' : ''));
+    if (P.res > (G.respect || 0)) lines.push('Requires ' + P.res + ' respect (you have ' + (G.respect || 0) + '). Do jobs, take turf, finish heists.');
+  } else {
+    lines.push('LEVEL ' + o.lvl + ' \u2022 income $' + propRate(P).toLocaleString() + '/game-hour \u2022 stash $' + Math.floor(o.stash).toLocaleString() + ' / $' + propCap(P).toLocaleString());
+  }
+  if (t) lines.push('TURF: ' + t.name + ' \u2014 ' + (mine ? 'YOURS (+50% income, no tax)' : GANGS[t.gang].name + ' collect 35% protection. Take the turf to cut them out.'));
+  const opts = [];
+  if (!o) opts.push(['Buy $' + P.price.toLocaleString(), () => { buyProperty(P); }]);
+  else {
+    opts.push(['Collect $' + Math.floor(o.stash).toLocaleString(), () => { collectProperty(P); }]);
+    if (o.lvl < 3) opts.push(['Upgrade $' + upgradeCost(P).toLocaleString(), () => { upgradeProperty(P); }]);
+  }
+  if (t && !mine) opts.push(['Take over turf', () => { closePanel(); takeTurf(P); }]);
+  opts.push(['Close', closePanel]); openPanel(P.name, lines, opts);
+}
+const upgradeCost = (P) => Math.round(P.price * 0.6 * EMP.own[P.id].lvl);
+function buyProperty(P) {
+  if (EMP.own[P.id]) return; if (P.res > (G.respect || 0)) { toast('NEED ' + P.res + ' RESPECT', '#ff5050'); return; }
+  if (G.cash < P.price) { toast('NOT ENOUGH CASH', '#ff5050'); return; }
+  G.cash -= P.price; EMP.own[P.id] = { lvl: 1, stash: 0 }; cashSound(); refreshPropMarker(P); bigMessage('PROPERTY ACQUIRED', P.name, '#3bff8a', 2.8); closePanel(); saveGame('manual');
+}
+function collectProperty(P) { const o = EMP.own[P.id]; if (!o) return; const amt = Math.floor(o.stash); if (amt < 1) { toast('NOTHING TO COLLECT YET', '#ffb23b'); return; } o.stash -= amt; G.cash += amt; cashSound(); toast('COLLECTED $' + amt.toLocaleString() + ' FROM ' + P.name, '#3bff8a'); if (P.kind === 'illicit' && Math.random() < 0.2 && wanted.level < 1) { setWanted(1); toast('A COP SAW THE HAND-OFF', '#ff5050'); } closePanel(); }
+function upgradeProperty(P) { const o = EMP.own[P.id], c = upgradeCost(P); if (!o || o.lvl >= 3) return; if (G.cash < c) { toast('NOT ENOUGH CASH', '#ff5050'); return; } G.cash -= c; o.lvl++; cashSound(); toast(P.name + ' UPGRADED TO LEVEL ' + o.lvl, '#3bff8a'); closePanel(); }
+function takeTurf(P) {
+  const t = PROP_TURF(P), W = WAR_SPOTS.find((w) => w.t === t); if (!W) return;
+  if (opsDist(W.x, W.z) < 260) startWar(W); else { setWaypoint(W.x, W.z, 'TURF WAR: ' + t.name); toast('GPS SET — GO TO ' + t.name.toUpperCase() + ' TO START THE WAR', '#ffd23b'); }
+}
+// ---------- tick: income accrual + rival raids ----------
+function empireUpdate(dt) {
+  if (!EMP.ready) return; const dh = dt * 24 / G.dayLen * (S.lockTime ? 1 : S.timeSpeed);
+  for (const P of PROPS) { const o = EMP.own[P.id]; if (!o) continue; o.stash = Math.min(propCap(P), o.stash + propRate(P) * dh); }
+  EMP.rt += dh;
+  if (EMP.rt >= 1) { EMP.rt = 0; empireRollRaid(); }
+  const R = EMP.raid;
+  if (R) { R.t -= dt; const alive = R.ents.filter((q) => peds.includes(q) && !q.dead && q.state !== 'down');
+    if (!alive.length) { const bonus = Math.round(R.P.price * 0.02); G.cash += bonus; EMP.raid = null; bigMessage('RAID REPELLED', R.P.name + ' \u2022 +$' + bonus.toLocaleString() + ' bonus', '#3bff8a', 3); }
+    else if (R.t <= 0 || opsDist(R.P.x, R.P.z) > 320) { const o = EMP.own[R.P.id]; if (o) o.stash *= 0.4; for (const q of R.ents) if (q.remove && distToCam(q.pos.x, q.pos.z) > 60) q.remove(); EMP.raid = null; toast('RIVALS RAIDED ' + R.P.name + ' \u2014 STASH STOLEN', '#ff3b5c'); } }
+}
+function empireRollRaid(force) {
+  if (EMP.raid && !force) return; const cand = PROPS.filter((P) => EMP.own[P.id] && P.turf && (P.kind === 'illicit' || !turfMine(P)));
+  if (!cand.length) return; const P = rpick(cand), t = PROP_TURF(P), p = opsDist(P.x, P.z);
+  if (!force && Math.random() > (P.kind === 'illicit' ? 0.18 : 0.08) * (turfMine(P) ? 0.3 : 1)) return;
+  if (G.state !== 'playing' || p > 170) { const o = EMP.own[P.id]; if (!force && o && p > 170) { o.stash *= 0.6; if (p < 3000) toast('RIVALS HIT ' + P.name + ' (STASH -40%)', '#ff7a2b'); } return; }
+  const ents = []; for (let k = 0; k < 3; k++) { const wp = walkPointNear(P.x, P.z, 18, 34); const q = new Gangster(t.gang, t, wp.x, wp.z, { hostile: true }); q.raider = true; peds.push(q); ents.push(q); }
+  EMP.raid = { P, ents, t: 90 }; bigMessage('RIVAL RAID', GANGS[t.gang].name + ' hit ' + P.name + ' \u2014 defend it!', GANGS[t.gang].css, 3); setWaypoint(P.x, P.z, 'RAID');
+}
+function empireSave() { const own = {}; for (const id in EMP.own) own[id] = { lvl: EMP.own[id].lvl, stash: Math.floor(EMP.own[id].stash) }; return { own, rt: EMP.rt }; }
+function empireLoad(d) {
+  EMP.own = {}; EMP.raid = null; EMP.rt = 0; if (d && d.own) for (const id in d.own) if (PROPS.some((P) => P.id === id)) EMP.own[id] = { lvl: clamp(d.own[id].lvl | 0 || 1, 1, 3), stash: +d.own[id].stash || 0 };
+  for (const P of PROPS) refreshPropMarker(P); EMP.ready = true;
+}
+empireLoad(null);
+// =====================================================================
+//  v5b WARDROBE: clothes, hats, eyewear, chains, jackets, hair, skin tone and tattoos for the player.
+//  Everything is generated in code (no third-party assets): clothing = fitted shells attached to the
+//  mannequin's bones, tattoos = alpha-textured shells. Bought at Neon Threads / Ink & Neon, changed at the
+//  safehouse wardrobe, saved in the v5b block of the save.
+// =====================================================================
+const WARD = { own: { classic: 1, none_hat: 1 }, eq: { outfit: 'classic', hat: 'none', eyes: 'none', chain: 'none', jacket: 'none', hair: 'short', hairc: '#2b1a0e', skin: '#e0ac7e', tat: { armR: 'none', armL: 'none', chest: 'none' } }, parts: [], built: false };
+const OUTFITS = [
+  { id: 'classic', name: 'Vice Classic', price: 0, top: 'tee', bottom: 'jeans', c1: '#ff4f9a', c2: '#f4f1ea' },
+  { id: 'neon', name: 'Neon Nights', price: 250, top: 'tee', bottom: 'jeans', c1: '#29f0ff', c2: '#14161a' },
+  { id: 'mint', name: 'Miami Mint', price: 200, top: 'tee', bottom: 'shorts', c1: '#7fffd4', c2: '#f4f4f4' },
+  { id: 'sunset', name: 'Sunset Tank', price: 220, top: 'tank', bottom: 'shorts', c1: '#ff8a3c', c2: '#2a2d42' },
+  { id: 'noir', name: 'Noir', price: 300, top: 'tee', bottom: 'jeans', c1: '#16181c', c2: '#24272d' },
+  { id: 'aloha', name: 'Aloha Shirt', price: 350, top: 'tee', bottom: 'shorts', c1: '#ff6b3d', c2: '#d8c9a0' },
+  { id: 'tux', name: 'Tuxedo', price: 1200, top: 'tee', bottom: 'jeans', c1: '#f6f6f6', c2: '#101114', jacket: '#101114' },
+  { id: 'bum', name: 'Beach Bum (shirtless)', price: 150, top: 'none', bottom: 'shorts', c1: '#000000', c2: '#2fb5c9' },
+  { id: 'escapee', name: 'Escapee Orange', price: 0, top: 'tee', bottom: 'jeans', c1: '#ff8a1c', c2: '#ff8a1c', unlock: 'jailbreak', lock: 'Free Reyes from Rock Island' },
+  { id: 'crew', name: 'Heist Crew Black', price: 0, top: 'tee', bottom: 'jeans', c1: '#0c0d10', c2: '#0c0d10', unlock: 'heist', lock: 'Pull off the Vice National heist' },
+];
+const HATS = [
+  { id: 'none_hat', name: 'No hat', price: 0 }, { id: 'cap_red', name: 'Red Cap', price: 80, kind: 'cap', c: '#e63946' }, { id: 'cap_blk', name: 'Black Cap', price: 80, kind: 'cap', c: '#15161a' },
+  { id: 'beanie', name: 'Beanie', price: 70, kind: 'beanie', c: '#3a6ea5' }, { id: 'bucket', name: 'Bucket Hat', price: 90, kind: 'bucket', c: '#e9e2c8' }, { id: 'band', name: 'Headband', price: 40, kind: 'band', c: '#ff2bd6' },
+  { id: 'mask', name: 'Balaclava', price: 0, kind: 'mask', c: '#0c0d10', unlock: 'heist', lock: 'Pull off the Vice National heist' },
+];
+const EYES = [{ id: 'none', name: 'No glasses', price: 0 }, { id: 'aviator', name: 'Aviators', price: 120, c: '#1a1d22', len: '#334' }, { id: 'round', name: 'Round shades', price: 100, c: '#222', len: '#111' }, { id: 'visor', name: 'Neon visor', price: 140, c: '#ff2bd6', len: '#29f0ff', glow: true }];
+const CHAINS = [{ id: 'none', name: 'No chain', price: 0 }, { id: 'gold', name: 'Gold chain', price: 500, c: '#ffc040' }, { id: 'silver', name: 'Silver chain', price: 300, c: '#d8dde4' }];
+const JACKETS = [{ id: 'none', name: 'No jacket', price: 0 }, { id: 'bomber', name: 'Bomber jacket', price: 400, c: '#2b3a55' }, { id: 'vest', name: 'Leather vest', price: 300, c: '#4a2f1d' }, { id: 'denim', name: 'Denim jacket', price: 380, c: '#3d6fa8' }];
+const HAIRS = [{ id: 'short', name: 'Short hair', price: 0 }, { id: 'bald', name: 'Shaved', price: 0 }, { id: 'long', name: 'Long hair', price: 60 }];
+const HAIR_COLS = [['Dark brown', '#2b1a0e'], ['Black', '#0d0d0f'], ['Blonde', '#d9b25f'], ['Auburn', '#7a3a1d'], ['Neon pink', '#ff4fd8']];
+const TATS = [{ id: 'none', name: 'No tattoo', price: 0 }, { id: 'tribal', name: 'Tribal', price: 150 }, { id: 'roses', name: 'Roses', price: 220 }, { id: 'wave', name: 'Neon wave', price: 180 }, { id: 'skull', name: 'Skull', price: 260 }, { id: 'anchor', name: 'Anchor', price: 200 }];
+const TAT_SLOTS = [['armR', 'Right arm'], ['armL', 'Left arm'], ['chest', 'Chest']];
+const _tatCache = {};
+function tatTexture(id) {
+  if (_tatCache[id]) return _tatCache[id]; const t = makeTex(256, 256, (g, w, h) => {
+    g.lineCap = 'round'; g.lineJoin = 'round'; const ink = '#142034';
+    if (id === 'tribal') { g.strokeStyle = ink; g.lineWidth = 9; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(10, 30 + k * 62); for (let x = 10; x <= 246; x += 30) g.lineTo(x, 30 + k * 62 + (x / 30 % 2 ? 24 : -4)); g.stroke(); } g.fillStyle = ink; for (let k = 0; k < 8; k++) { g.beginPath(); g.moveTo(16 + k * 32, 0); g.lineTo(32 + k * 32, 22); g.lineTo(48 + k * 32, 0); g.fill(); } }
+    else if (id === 'roses') { for (let k = 0; k < 3; k++) { const x = 40 + k * 80, y = 60 + (k % 2) * 90; g.fillStyle = '#c3213a'; g.beginPath(); g.arc(x, y, 26, 0, 7); g.fill(); g.strokeStyle = '#6a0f1e'; g.lineWidth = 5; for (let r = 5; r < 26; r += 7) { g.beginPath(); g.arc(x, y, r, 0.4, 5.2); g.stroke(); } g.strokeStyle = '#2a7a3a'; g.lineWidth = 7; g.beginPath(); g.moveTo(x, y + 26); g.quadraticCurveTo(x - 20, y + 62, x + 6, y + 92); g.stroke(); } }
+    else if (id === 'wave') { for (let k = 0; k < 3; k++) { g.strokeStyle = ['#29f0ff', '#ff2bd6', '#6a5cff'][k]; g.lineWidth = 10; g.beginPath(); for (let x = 0; x <= 256; x += 8) { const y = 64 + k * 50 + Math.sin(x / 22 + k) * 22; if (x) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke(); } }
+    else if (id === 'skull') { g.fillStyle = '#e8e6df'; g.strokeStyle = ink; g.lineWidth = 6; g.beginPath(); g.ellipse(128, 110, 52, 58, 0, 0, 7); g.fill(); g.stroke(); g.fillStyle = ink; g.beginPath(); g.ellipse(106, 108, 14, 18, 0, 0, 7); g.ellipse(150, 108, 14, 18, 0, 0, 7); g.fill(); g.beginPath(); g.moveTo(128, 128); g.lineTo(120, 150); g.lineTo(136, 150); g.fill(); g.fillRect(104, 160, 48, 22); g.fillStyle = '#e8e6df'; for (let k = 0; k < 5; k++) g.fillRect(108 + k * 9, 160, 5, 22); }
+    else if (id === 'anchor') { g.strokeStyle = ink; g.lineWidth = 10; g.beginPath(); g.moveTo(128, 50); g.lineTo(128, 190); g.moveTo(96, 80); g.lineTo(160, 80); g.moveTo(70, 150); g.quadraticCurveTo(128, 240, 186, 150); g.stroke(); g.beginPath(); g.arc(128, 40, 14, 0, 7); g.stroke(); }
+  }, { srgb: true }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.needsUpdate = true; return (_tatCache[id] = t);
+}
+const _wm = {}; const wmat = (hex, o = {}) => { const k = hex + (o.e || '') + (o.r || ''); return _wm[k] || (_wm[k] = new THREE.MeshStandardMaterial({ color: hex, roughness: o.r ?? 0.85, metalness: o.m ?? 0, emissive: o.e || 0x000000, emissiveIntensity: o.ei ?? 1 })); };
+const _wY = new THREE.Vector3(0, 1, 0);
+function wBone(n) { return player.h.glb ? player.h.group.getObjectByName(n) : null; }
+function wLocal(bone, out) { const g = player.h.group; g.updateMatrixWorld(true); bone.getWorldPosition(out); return g.worldToLocal(out); }
+function wAttach(bone, mesh) { const g = player.h.group; g.add(mesh); g.updateMatrixWorld(true); bone.attach(mesh); mesh.castShadow = false; mesh.receiveShadow = false; WARD.parts.push(mesh); return mesh; }
+// a tapered shell between two bones (group-local), optionally flattened (sx, sz) and extended past the ends
+function wSeg(a, b, r0, r1, mat, o = {}) {
+  const A = wBone(a), B = wBone(b); if (!A || !B) return null; const pa = wLocal(A, new THREE.Vector3()), pb = wLocal(B, new THREE.Vector3());
+  const f = o.from ?? 0, t = o.to ?? 1, p0 = pa.clone().lerp(pb, f), p1 = pa.clone().lerp(pb, t), dir = p1.clone().sub(p0), len = dir.length() + (o.e0 || 0) + (o.e1 || 0); if (len < 0.005) return null; dir.normalize();
+  const geo = new THREE.CylinderGeometry(r1, r0, len, o.seg || 10, 1, !!o.open); if (o.sx || o.sz) geo.scale(o.sx || 1, 1, o.sz || 1);
+  const m = new THREE.Mesh(geo, mat); m.quaternion.setFromUnitVectors(_wY, dir); m.position.copy(p0).addScaledVector(dir, (len - (o.e0 || 0) + (o.e1 || 0)) / 2);
+  return wAttach(A, m);
+}
+function wBall(bone, r, mat, off, sc, hemi) { const B = wBone(bone); if (!B) return null; const geo = new THREE.SphereGeometry(r, 14, 10, 0, TAU, 0, hemi ? Math.PI / 2 : Math.PI); if (sc) geo.scale(...sc); const m = new THREE.Mesh(geo, mat); const p = wLocal(B, new THREE.Vector3()); m.position.copy(p).add(new THREE.Vector3(...off)); return wAttach(B, m); }
+function wBox(bone, size, mat, off, rot) { const B = wBone(bone); if (!B) return null; const m = new THREE.Mesh(boxGeo, mat); m.scale.set(...size); const p = wLocal(B, new THREE.Vector3()); m.position.copy(p).add(new THREE.Vector3(...off)); if (rot) m.rotation.set(...rot); return wAttach(B, m); }
+function wTorus(bone, R, tube, mat, off, rot) { const B = wBone(bone); if (!B) return null; const m = new THREE.Mesh(new THREE.TorusGeometry(R, tube, 6, 22), mat); const p = wLocal(B, new THREE.Vector3()); m.position.copy(p).add(new THREE.Vector3(...off)); m.rotation.set(...(rot || [Math.PI / 2, 0, 0])); return wAttach(B, m); }
+function clearWardrobeParts() { for (const m of WARD.parts) { if (m.parent) m.parent.remove(m); if (m.geometry) m.geometry.dispose(); } WARD.parts.length = 0; }
+function buildWardrobe() {
+  if (!player.h.glb) return; clearWardrobeParts(); const E = WARD.eq, of = OUTFITS.find((o) => o.id === E.outfit) || OUTFITS[0];
+  // base body = skin; shirt/pants colours come from the shells below
+  player.h.group.traverse((o) => { if (!o.isMesh || o.material === BLOB_MAT || !o.isSkinnedMesh) return; if (!o.userData.wOwn) { o.material = [].concat(o.material).map((m) => m.clone()); if (o.material.length === 1) o.material = o.material[0]; o.userData.wOwn = true; }
+    for (const m of [].concat(o.material)) { const joints = /Joints/i.test(m.name); m.color.set(E.skin); if (joints) m.color.multiplyScalar(0.72); m.roughness = 0.6; } });
+  const c1 = wmat(of.c1), c2 = wmat(of.c2), shoe = wmat(of.id === 'noir' || of.id === 'crew' ? '#101114' : '#f2f2f2', { r: 0.6 }), skinM = wmat(E.skin, { r: 0.6 });
+  // torso
+  if (of.top !== 'none') {
+    wSeg('pelvis', 'spine_03', 0.158, 0.178, c1, { sx: 1.3, sz: 0.9, seg: 14, e0: -0.02 }); wSeg('spine_03', 'neck_01', 0.18, 0.108, c1, { sx: 1.55, sz: 0.85, seg: 14, e1: 0.02 });
+    if (of.top === 'tee') for (const s of ['l', 'r']) { wSeg('upperarm_' + s, 'lowerarm_' + s, 0.066, 0.06, c1, { to: 0.62, e0: 0.03 }); wBall('upperarm_' + s, 0.07, c1, [0, 0, 0]); }
+    if (of.top === 'tank') for (const s of ['l', 'r']) wBall('upperarm_' + s, 0.052, c1, [0, 0.01, 0]);
+  }
+  // legs
+  wSeg('pelvis', 'spine_01', 0.152, 0.152, c2, { sx: 1.28, sz: 0.92, seg: 14, e0: 0.05, e1: -0.01 });
+  for (const s of ['l', 'r']) { wSeg('thigh_' + s, 'calf_' + s, 0.12, 0.094, c2, { to: of.bottom === 'shorts' ? 0.62 : 1, e0: 0.03 }); if (of.bottom !== 'shorts') wSeg('calf_' + s, 'foot_' + s, 0.09, 0.068, c2, { e1: 0 }); wSeg('foot_' + s, 'ball_' + s, 0.052, 0.046, shoe, { e0: 0.05, e1: 0.06, sx: 0.95, sz: 1.35 }); }
+  // jacket (outfit jacket or equipped jacket)
+  const jid = E.jacket !== 'none' ? E.jacket : null, jdef = jid ? JACKETS.find((j) => j.id === jid) : null, jc = of.jacket ? wmat(of.jacket) : jdef ? wmat(jdef.c) : null;
+  if (jc) { wSeg('pelvis', 'spine_03', 0.162, 0.18, jc, { sx: 1.3, sz: 0.92, seg: 14, e0: -0.04, e1: 0.02 }); wSeg('spine_03', 'neck_01', 0.182, 0.115, jc, { sx: 1.55, sz: 0.9, seg: 14, e1: 0.03 });
+    if (jid !== 'vest') for (const s of ['l', 'r']) { wSeg('upperarm_' + s, 'lowerarm_' + s, 0.064, 0.058, jc, { e0: 0.03 }); wSeg('lowerarm_' + s, 'hand_' + s, 0.057, 0.05, jc, { e1: -0.02 }); wBall('upperarm_' + s, 0.068, jc, [0, 0, 0]); } else for (const s of ['l', 'r']) wBall('upperarm_' + s, 0.058, jc, [0, 0.01, 0]); }
+  // tattoos (arms are covered by sleeves where clothes are worn, so ink shows on bare skin)
+  for (const [slot, d] of [['armR', 'r'], ['armL', 'l']]) { const id = E.tat[slot]; if (!id || id === 'none') continue; const mat = new THREE.MeshStandardMaterial({ map: tatTexture(id), transparent: true, roughness: 0.7, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    wSeg('lowerarm_' + d, 'hand_' + d, 0.056, 0.046, mat, { open: true, seg: 14, e1: -0.03 }); wSeg('upperarm_' + d, 'lowerarm_' + d, 0.062, 0.058, mat, { open: true, seg: 14 }); }
+  if (E.tat.chest && E.tat.chest !== 'none') { const B = wBone('spine_02'); if (B) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), new THREE.MeshStandardMaterial({ map: tatTexture(E.tat.chest), transparent: true, roughness: 0.7, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); const p = wLocal(B, new THREE.Vector3()); m.position.set(p.x, p.y + 0.06, p.z + 0.118); wAttach(B, m); } }
+  // chain, hair, hats, eyewear (head-space: Head bone is at the skull base; the skull centre is ~0.11 above it)
+  const ch = CHAINS.find((c) => c.id === E.chain); if (ch && ch.c) wTorus('neck_01', 0.105, 0.012, wmat(ch.c, { m: 0.9, r: 0.25 }), [0, -0.035, 0.02], [Math.PI / 2 - 0.35, 0, 0]);
+  const hat = HATS.find((h) => h.id === E.hat), hh = [0, 0.1, 0];
+  const hairM = wmat(E.hairc, { r: 0.7 }); const showHair = !hat || !hat.kind || hat.kind === 'band';
+  if (showHair && E.hair !== 'bald') { wBall('Head', 0.098, hairM, [0, 0.118, -0.006], [1, 0.95, 1.04], true); if (E.hair === 'long') wSeg('Head', 'neck_01', 0.082, 0.07, hairM, { sx: 1, sz: 0.7, from: 0.1, e0: 0, e1: 0.09 }); }
+  if (hat && hat.kind) {
+    const hm = wmat(hat.c, { r: 0.8 });
+    if (hat.kind === 'cap') { wBall('Head', 0.108, hm, [0, 0.118, -0.004], [1, 0.9, 1.05], true); wBox('Head', [0.17, 0.012, 0.11], hm, [0, 0.13, 0.12], [0.12, 0, 0]); }
+    else if (hat.kind === 'beanie') { wBall('Head', 0.106, hm, [0, 0.112, 0], [1, 1.05, 1.03], true); wTorus('Head', 0.103, 0.017, wmat('#222'), [0, 0.118, 0], [Math.PI / 2, 0, 0]); }
+    else if (hat.kind === 'bucket') { wBall('Head', 0.103, hm, [0, 0.12, 0], [1, 0.95, 1.02], true); wSeg('Head', 'Head', 0.17, 0.12, hm, { e0: 0.012, e1: 0.012, seg: 18 }); const L = WARD.parts[WARD.parts.length - 1]; if (L) L.position.y += 0.13; }
+    else if (hat.kind === 'band') wTorus('Head', 0.1, 0.012, hm, [0, 0.15, -0.004], [Math.PI / 2, 0, 0]);
+    else if (hat.kind === 'mask') { wBall('Head', 0.108, hm, [0, 0.1, -0.003], [1, 1.12, 1.04], false); wBox('Head', [0.12, 0.034, 0.02], skinM, [0, 0.11, 0.104]); }
+  }
+  const ey = EYES.find((e) => e.id === E.eyes);
+  if (ey && ey.c && !(hat && hat.kind === 'mask' && false)) { const fm = wmat(ey.c, { r: 0.4, m: 0.3 }), lm = wmat(ey.len, { r: 0.1, m: 0.6, e: ey.glow ? ey.len : undefined, ei: ey.glow ? 1.2 : 1 });
+    if (E.eyes === 'visor') wBox('Head', [0.15, 0.04, 0.03], lm, [0, 0.11, 0.1]); else { for (const s of [-1, 1]) wBox('Head', E.eyes === 'round' ? [0.04, 0.04, 0.012] : [0.05, 0.035, 0.012], lm, [s * 0.034, 0.11, 0.1]); wBox('Head', [0.1, 0.008, 0.012], fm, [0, 0.118, 0.103]); } }
+  WARD.built = true;
+}
+// ---------- UI ----------
+const wardOwned = (id) => !!WARD.own[id];
+function wardUnlocked(it) { return !it.unlock || (G.v5b.ops[it.unlock] || 0) > 0; }
+function wardEquip(cat, it) {
+  const E = WARD.eq; if (cat === 'outfit') E.outfit = it.id; else if (cat === 'hat') E.hat = it.id; else if (cat === 'eyes') E.eyes = it.id; else if (cat === 'chain') E.chain = it.id; else if (cat === 'jacket') E.jacket = it.id; else if (cat === 'hair') E.hair = it.id;
+  buildWardrobe();
+}
+function openWardrobe(mode, cat) {
+  const shop = mode === 'shop', ink = mode === 'tattoo', E = WARD.eq;
+  if (!cat) {
+    const cats = ink ? [['tat:armR', 'Right arm'], ['tat:armL', 'Left arm'], ['tat:chest', 'Chest']] : [['outfit', 'Outfits'], ['jacket', 'Jackets'], ['hat', 'Headwear'], ['eyes', 'Eyewear'], ['chain', 'Chains'], ['hair', 'Hair'], ['skin', 'Skin tone']];
+    const lines = [ink ? 'Pick a slot, then a design. Ink is permanent \u2014 until you change it.' : shop ? 'Everything you buy stays in your wardrobe at the safehouse.' : 'Your wardrobe \u2014 buy new gear at Neon Threads and Ink & Neon.', 'Cash $' + Math.floor(G.cash).toLocaleString()];
+    openPanel(ink ? 'INK & NEON TATTOO' : shop ? 'NEON THREADS' : 'WARDROBE', lines, [...cats.map(([k, n]) => [n, () => openWardrobe(mode, k)]), ['Close', closePanel]]); return;
+  }
+  const back = ['Back', () => openWardrobe(mode)];
+  if (cat === 'skin') { openPanel('SKIN TONE', ['Free to change.'], [...SKIN.map((c, i) => [(E.skin === c ? '\u2714 ' : '') + 'Tone ' + (i + 1), () => { E.skin = c; buildWardrobe(); openWardrobe(mode, 'skin'); }]), back, ['Close', closePanel]]); return; }
+  if (cat.startsWith('tat:')) {
+    const slot = cat.slice(4); const lines = ['Cash $' + Math.floor(G.cash).toLocaleString()];
+    openPanel('TATTOO — ' + TAT_SLOTS.find((s) => s[0] === slot)[1].toUpperCase(), lines, [...TATS.map((t) => { const k = 'tat_' + t.id; const own = !t.price || wardOwned(k + '_' + slot); return [(E.tat[slot] === t.id ? '\u2714 ' : '') + t.name + (own ? '' : ' $' + t.price), () => {
+      if (!own) { if (!ink) return toast('VISIT INK & NEON TO GET TATTOOED', '#ffb23b'); if (G.cash < t.price) return toast('NOT ENOUGH CASH', '#ff5050'); G.cash -= t.price; WARD.own[k + '_' + slot] = 1; cashSound(); saveGame('manual'); }
+      E.tat[slot] = t.id; buildWardrobe(); openWardrobe(mode, cat); }]; }), back, ['Close', closePanel]]); return;
+  }
+  if (cat === 'hair') {
+    openPanel('HAIR', ['Style and colour. Colours are free.'], [...HAIRS.map((h) => [(E.hair === h.id ? '\u2714 ' : '') + h.name + (!h.price || wardOwned('hair_' + h.id) ? '' : ' $' + h.price), () => { if (h.price && !wardOwned('hair_' + h.id)) { if (!shop) return toast('BUY IT AT NEON THREADS', '#ffb23b'); if (G.cash < h.price) return toast('NOT ENOUGH CASH', '#ff5050'); G.cash -= h.price; WARD.own['hair_' + h.id] = 1; cashSound(); } wardEquip('hair', h); openWardrobe(mode, 'hair'); }]),
+      ...HAIR_COLS.map(([n, c]) => [(E.hairc === c ? '\u2714 ' : '') + n, () => { E.hairc = c; buildWardrobe(); openWardrobe(mode, 'hair'); }]), back, ['Close', closePanel]]); return;
+  }
+  const L = { outfit: OUTFITS, hat: HATS, eyes: EYES, chain: CHAINS, jacket: JACKETS }[cat], eqId = { outfit: E.outfit, hat: E.hat, eyes: E.eyes, chain: E.chain, jacket: E.jacket }[cat], title = { outfit: 'OUTFITS', hat: 'HEADWEAR', eyes: 'EYEWEAR', chain: 'CHAINS', jacket: 'JACKETS' }[cat];
+  const opts = L.map((it) => {
+    const key = it.id, lockd = !wardUnlocked(it), own = wardOwned(key) || !it.price && !it.unlock || (it.unlock && !lockd);
+    return [(eqId === it.id ? '\u2714 ' : lockd ? '\uD83D\uDD12 ' : '') + it.name + (own ? '' : ' $' + it.price), () => {
+      if (lockd) return toast('LOCKED: ' + it.lock, '#ffb23b');
+      if (!own) { if (!shop) return toast('BUY IT AT NEON THREADS', '#ffb23b'); if (G.cash < it.price) return toast('NOT ENOUGH CASH', '#ff5050'); G.cash -= it.price; WARD.own[key] = 1; cashSound(); saveGame('manual'); }
+      wardEquip(cat, it); openWardrobe(mode, cat); }];
+  });
+  openPanel(title, ['Cash $' + Math.floor(G.cash).toLocaleString() + (mode === 'home' ? ' \u2022 owned items only are free to wear; buy new ones in the shops' : '')], [...opts, back, ['Close', closePanel]]);
+}
+function wardrobeUpdate(dt) { if (!WARD.built && player.h.glb && G.state === 'playing') buildWardrobe(); }
+function wardrobeSave() { return { own: WARD.own, eq: WARD.eq }; }
+function wardrobeLoad(d) {
+  if (d && d.eq) { const E = WARD.eq; for (const k of ['outfit', 'hat', 'eyes', 'chain', 'jacket', 'hair', 'hairc', 'skin']) if (typeof d.eq[k] === 'string') E[k] = d.eq[k]; E.tat = Object.assign({ armR: 'none', armL: 'none', chest: 'none' }, d.eq.tat || {}); }
+  if (d && d.own) Object.assign(WARD.own, d.own); WARD.built = false;
+}
 // ===================== v5a.1: drive-by shooting (player + gang passengers), shared speed/miss model =====================
 const DRIVEBY = { arc: 1.75, range: 48, last: null }; // ±100° from the nose: forward + both side windows, never straight back
 function moveAccK(speed) { return 1 / (1 + Math.max(0, speed) / 14); } // shared: hit chance x this, spread / this
@@ -6109,6 +6867,7 @@ function updateSky() {
   const focus = playerWorldPos();
   { const tx = (sun.shadow.camera.right - sun.shadow.camera.left) / (sun.shadow.mapSize.x || 1024); focus.x = Math.round(focus.x / tx) * tx; focus.z = Math.round(focus.z / tx) * tx; }
   sun.position.set(focus.x + lightDir.x * 200, lightDir.y * 200, focus.z + lightDir.z * 200); sun.target.position.set(focus.x, 0, focus.z);
+  if (CASC.on) cascadeUpdate();
   sun.color.lerpColors(a.sun, b.sun, f); sun.intensity = lerp(a.si, b.si, f);
   hemi.color.lerpColors(a.hs, b.hs, f); hemi.groundColor.lerpColors(a.hg, b.hg, f); hemi.intensity = lerp(a.hi, b.hi, f);
   scene.fog.color.lerpColors(a.fog, b.fog, f); scene.fog.density = lerp(a.fd, b.fd, f);
@@ -6375,7 +7134,8 @@ function updateHUD(dt) {
     setText('drift', drift.active ? 'DRIFT x' + (1 + Math.min(drift.t, 4) * 0.25).toFixed(2) + '  ' + Math.floor(drift.score) : '');
   }
   toggle('crosshair', !c && player.weapon > 0 && G.state === 'playing');
-  toggle('mission', !!mission.active);
+  toggle('mission', !!mission.active || !!OPS.id);
+  if (!mission.active && OPS.id) { setText('missionTitle', OPS.title); setStyle('missionTitle', 'color', OPS.css); setText('missionObj', OPS.obj); setText('missionTimer', OPS.timer > 0 ? Math.floor(OPS.timer / 60) + ':' + String(Math.floor(OPS.timer % 60)).padStart(2, '0') : ''); }
   if (mission.active) {
     const t = Math.max(0, mission.timeLeft); setText('missionTitle', mission.def.name); setStyle('missionTitle', 'color', mission.def.css);
     let obj = '';
@@ -6465,7 +7225,7 @@ function wasted(kind) {
   G.state = 'wasted'; G.wastedT = 0; G.wastedKind = kind;
   bigMessage(kind, kind === 'WASTED' ? 'Hospital bill: $500' : 'Bail $350 • weapons confiscated • released at Police HQ', kind === 'WASTED' ? '#ff2b4f' : '#4fb0ff', 4);
   if (!player.car) player.knockT = 99;
-  if (mission.active) endMission(false);
+  if (mission.active) endMission(false); if (OPS.id) opsFail('You were taken down');
   audio.chime([55, 51, 48, 43], 0.22, 'sawtooth', 0.15);
 }
 function respawn() {

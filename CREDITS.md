@@ -40,6 +40,11 @@ All gameplay code, city generation, shaders, HUD and audio synthesis are origina
 ## v5a.2 additions
 - The Ocean Drive look is generated in code with no new third-party assets: boulevard median, carriageway, promenade and sea wall, beach crowd, umbrellas, art-deco awnings, planters, neon blade signs, palm sway, the supertall glass skyline, daylight colour grade, HUD restyle, police helicopter and the tank models.
 
+## v5b additions
+- Vehicles: [Kenney Car Kit](https://kenney.nl/assets/car-kit) and [Kenney Watercraft Kit](https://kenney.nl/assets/watercraft-kit) (CC0 1.0) — vans, box truck, ambulance, delivery van, sports cars, SUV, speedboat, jet boat and fishing boat, merged and re-coloured into `assets/models/kenney_vehicles.glb`.
+- Textures (Ultra quality only): 4K versions of Poly Haven CC0 textures [Asphalt 05](https://polyhaven.com/a/asphalt_05) (diffuse + normal), [Concrete Pavers 02](https://polyhaven.com/a/concrete_pavers_02) (diffuse) and [Red Brick 03](https://polyhaven.com/a/red_brick_03) (diffuse), as KTX2 with JPG fallback. Never downloaded on Low, Medium or High.
+- Generated in code, no external files: the prison isle breakout, the Vice National bank interior and vault, the hacking minigame, the seaplane, marinas, the property/turf empire, the clothing and tattoo shops (all outfits, hats, eyewear, chains, hair and tattoo designs are procedural meshes and canvas artwork) and the cascaded shadow maps.
+
 ## Runtime libraries (loaded from CDN)
 - [three.js](https://threejs.org) r160 — MIT License (unpkg.com).
 
