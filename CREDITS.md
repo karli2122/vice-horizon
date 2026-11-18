@@ -45,6 +45,10 @@ All gameplay code, city generation, shaders, HUD and audio synthesis are origina
 - Textures (Ultra quality only): 4K versions of Poly Haven CC0 textures [Asphalt 05](https://polyhaven.com/a/asphalt_05) (diffuse + normal), [Concrete Pavers 02](https://polyhaven.com/a/concrete_pavers_02) (diffuse) and [Red Brick 03](https://polyhaven.com/a/red_brick_03) (diffuse), as KTX2 with JPG fallback. Never downloaded on Low, Medium or High.
 - Generated in code, no external files: the prison isle breakout, the Vice National bank interior and vault, the hacking minigame, the seaplane, marinas, the property/turf empire, the clothing and tattoo shops (all outfits, hats, eyewear, chains, hair and tattoo designs are procedural meshes and canvas artwork) and the cascaded shadow maps.
 
+## v6a additions
+- No new third-party assets. Everything below is generated in code (three.js primitives and canvas textures): the motorcycles, sport bike and bicycle (and their riders), the Los Tuners tuning shop (paint, rims, neon underglow, window tint), the verlet ragdolls (they pose the existing Quaternius CC0 mannequin skeleton), the SWAT van decals and light bar, roadblocks and spike strips, the in-game phone, the street races and the stunt ramps.
+- The SWAT van is the existing Kenney Car Kit van (CC0), re-painted and fitted with a code-built light bar.
+
 ## Runtime libraries (loaded from CDN)
 - [three.js](https://threejs.org) r160 — MIT License (unpkg.com).
 
