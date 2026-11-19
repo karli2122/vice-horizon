@@ -49,6 +49,9 @@ All gameplay code, city generation, shaders, HUD and audio synthesis are origina
 - No new third-party assets. Everything below is generated in code (three.js primitives and canvas textures): the motorcycles, sport bike and bicycle (and their riders), the Los Tuners tuning shop (paint, rims, neon underglow, window tint), the verlet ragdolls (they pose the existing Quaternius CC0 mannequin skeleton), the SWAT van decals and light bar, roadblocks and spike strips, the in-game phone, the street races and the stunt ramps.
 - The SWAT van is the existing Kenney Car Kit van (CC0), re-painted and fitted with a code-built light bar.
 
+## v6b additions
+- No new third-party assets. The sharper, more detailed look is generated in code: the CAS-style sharpen pass and FXAA/native-resolution rendering, window mullions and fins on glass towers, window AC units, blade signs, fire escapes, stepped-tier and mid-rise buildings, bus stops and shelters, and the restored facade/shopfront/rooftop detail on streamed blocks (three.js primitives and canvas textures).
+
 ## Runtime libraries (loaded from CDN)
 - [three.js](https://threejs.org) r160 — MIT License (unpkg.com).
 

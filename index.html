@@ -334,19 +334,19 @@ const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) 
 const IS_MOBILE = IS_TOUCH || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 if (IS_TOUCH) document.body.classList.add('touch');
 const QUALITY = {
-  low: { pr: 0.85, shadow: 0, bloom: false, fxaa: true, grain: false, peds: 12, traffic: 10, far: 900, fogMul: 0.8, detNor: false, humanShadow: false, carShadow: false },
-  medium: { pr: 1.15, shadow: 1024, bloom: true, fxaa: true, grain: true, peds: 18, traffic: 16, far: 1600, fogMul: 0.7, detNor: true, humanShadow: false, carShadow: true, blur: true, props: true },
-  high: { pr: 1.5, shadow: 2048, bloom: true, fxaa: true, grain: true, peds: 26, traffic: 30, far: 3200, fogMul: 0.6, detNor: true, humanShadow: true, carShadow: true, tex2k: true, ao: 0.5, blur: true, props: true },
-  ultra: { pr: 2.0, shadow: 4096, bloom: true, fxaa: true, grain: true, peds: 34, traffic: 38, far: 3200, fogMul: 0.55, detNor: true, humanShadow: true, carShadow: true, tex2k: true, tex4k: true, ao: 1, blur: true, props: true },
+  low: { pr: 1.0, shadow: 0, bloom: false, fxaa: true, grain: false, peds: 12, traffic: 10, far: 900, fogMul: 0.6, detNor: false, humanShadow: false, carShadow: false },
+  medium: { pr: 1.5, shadow: 1024, bloom: true, fxaa: true, grain: true, peds: 18, traffic: 16, far: 1600, fogMul: 0.5, detNor: true, humanShadow: false, carShadow: true, blur: true, props: true },
+  high: { pr: 2.0, shadow: 2048, bloom: true, fxaa: true, grain: true, peds: 26, traffic: 30, far: 3200, fogMul: 0.42, detNor: true, humanShadow: true, carShadow: true, tex2k: true, ao: 0.5, blur: true, props: true },
+  ultra: { pr: 2.5, shadow: 4096, bloom: true, fxaa: true, grain: true, peds: 34, traffic: 38, far: 3200, fogMul: 0.36, detNor: true, humanShadow: true, carShadow: true, tex2k: true, tex4k: true, ao: 1, blur: true, props: true },
 };
 // ---------- v6a: mobile GPU detection + the mobile-safe profiles ----------
 const GPU_NAME = (() => { try { const c = document.createElement('canvas'), gl = c.getContext('webgl2') || c.getContext('webgl'); if (!gl) return ''; const e = gl.getExtension('WEBGL_debug_renderer_info'); const r = e ? String(gl.getParameter(e.UNMASKED_RENDERER_WEBGL)) : ''; const lc = gl.getExtension('WEBGL_lose_context'); if (lc) lc.loseContext(); return r; } catch (e) { return ''; } })();
 function isMobileHighGpu(name, ua) { const m = /Adreno[^0-9]*([0-9]{3})/i.exec(name); if (m && +m[1] >= 730) return true; if (/Immortalis|Mali-G7[1-9][0-9]|Mali-G[89][0-9]/i.test(name)) return true; if (/Apple (GPU|A1[5-9]|M)/i.test(name) && /iPhone|iPad/i.test(ua)) return true; return false; }
-const MOBILE_HIGH = IS_MOBILE && isMobileHighGpu(GPU_NAME, navigator.userAgent);
+const MOBILE_HIGH = IS_MOBILE && (isMobileHighGpu(GPU_NAME, navigator.userAgent) || /[?&]mh=1/.test(location.search));
 if (IS_MOBILE) { // phones never get 4K/2K textures, 3-cascade shadows, SSR/AO/DOF/motion blur or a render scale above 1 CSS px
-  QUALITY.low.pr = 0.85; QUALITY.low.far = 700; QUALITY.low.traffic = 11;
-  Object.assign(QUALITY.medium, { pr: 1.0, far: 1100, traffic: 14, peds: 12, shadow: 0, bloom: false, grain: false, blur: false });
-  for (const k of ['high', 'ultra']) Object.assign(QUALITY[k], { pr: 1.0, shadow: 1024, ao: 0, tex2k: false, tex4k: false, blur: false, humanShadow: false, grain: false, far: k === 'ultra' ? 1800 : 1500, traffic: k === 'ultra' ? 22 : 20, fogMul: 0.6 });
+  QUALITY.low.pr = 1.0; QUALITY.low.far = 700; QUALITY.low.traffic = 11;
+  Object.assign(QUALITY.medium, { pr: 1.25, far: 1100, traffic: 14, peds: 12, shadow: 0, bloom: false, grain: false, blur: false });
+  for (const k of ['high', 'ultra']) Object.assign(QUALITY[k], { pr: MOBILE_HIGH ? 2.0 : 1.25, shadow: MOBILE_HIGH ? 2048 : 1024, ao: 0, tex2k: false, tex4k: false, blur: false, humanShadow: false, grain: false, far: k === 'ultra' ? 1800 : 1500, traffic: k === 'ultra' ? 22 : 20, fogMul: 0.42 });
 }
 function autoQuality() {
   if (!IS_MOBILE) return 'high';
@@ -382,7 +382,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 $('app').appendChild(renderer.domElement);
 renderer.domElement.tabIndex = 0;
 const HW_ANISO = renderer.capabilities.getMaxAnisotropy(); // v5a.1: full hardware max on PC, 4-8 on touch devices
-let maxAniso = IS_TOUCH ? Math.min(HW_ANISO, Q === QUALITY.low ? 4 : 8) : HW_ANISO;
+let maxAniso = IS_TOUCH ? Math.min(HW_ANISO, Q === QUALITY.low ? 4 : Q === QUALITY.medium ? 8 : 16) : HW_ANISO;
 const LOD_BIAS = Q.tex2k ? -0.35 : Q === QUALITY.low ? 0 : -0.2;
 
 const scene = new THREE.Scene();
@@ -405,6 +405,22 @@ composer.addPass(bloomPass);
 composer.addPass(new OutputPass());
 const fxaaPass = new ShaderPass(FXAAShader);
 composer.addPass(fxaaPass);
+// v6b: contrast-adaptive sharpening (CAS-style, 5 taps) after FXAA so the image stays crisp at any render scale
+const CASShader = {
+  uniforms: { tDiffuse: { value: null }, uPx: { value: new THREE.Vector2(1 / 1024, 1 / 768) }, uSharp: { value: 0.6 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 uPx; uniform float uSharp; varying vec2 vUv;
+    void main(){
+      vec3 e = texture2D(tDiffuse, vUv).rgb;
+      vec3 a = texture2D(tDiffuse, vUv + vec2(0.0, -uPx.y)).rgb, b = texture2D(tDiffuse, vUv + vec2(-uPx.x, 0.0)).rgb, d = texture2D(tDiffuse, vUv + vec2(uPx.x, 0.0)).rgb, f = texture2D(tDiffuse, vUv + vec2(0.0, uPx.y)).rgb;
+      vec3 mn = min(min(min(a, b), min(d, f)), e), mx = max(max(max(a, b), max(d, f)), e);
+      vec3 amp = sqrt(clamp(min(mn, 1.0 - mx) / max(mx, vec3(0.0001)), 0.0, 1.0));
+      vec3 w = amp * (-1.0 / mix(8.0, 5.0, uSharp));
+      gl_FragColor = vec4(clamp((w * (a + b + d + f) + e) / (1.0 + 4.0 * w), 0.0, 1.0), 1.0);
+    }`,
+};
+const casPass = new ShaderPass(CASShader);
+composer.addPass(casPass);
 const GrainShader = {
   uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uGrain: { value: 0.035 }, uVig: { value: 0.32 }, uBlur: { value: 0 }, uBlurDir: { value: new THREE.Vector2() }, uGrade: { value: new THREE.Vector4(1, 0, 0, 0) } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
@@ -438,7 +454,7 @@ const GrainShader = {
 };
 const grainPass = new ShaderPass(GrainShader);
 composer.addPass(grainPass);
-function setFxaaRes() { const pr = renderer.getPixelRatio(); fxaaPass.material.uniforms.resolution.value.set(1 / (window.innerWidth * pr), 1 / (window.innerHeight * pr)); }
+function setFxaaRes() { const pr = renderer.getPixelRatio(); fxaaPass.material.uniforms.resolution.value.set(1 / (window.innerWidth * pr), 1 / (window.innerHeight * pr)); casPass.uniforms.uPx.value.set(1 / (window.innerWidth * pr), 1 / (window.innerHeight * pr)); fxaaPass.enabled = !!Q.fxaa && pr < 1.75; casPass.enabled = true; casPass.uniforms.uSharp.value = pr >= 1.75 ? 0.45 : pr >= 1.25 ? 0.6 : 0.75; }
 setFxaaRes();
 
 // ---------- procedural canvas textures ----------
@@ -1630,9 +1646,13 @@ function genBlock(bx, bz) { // v4 block generator (mid/downtown/deco/park/lot); 
     const nx = rng() < 0.5 ? 2 : 3, nz = 2, cw = 44 / nx, cd = 44 / nz;
     const distDown = Math.hypot(bx - CB0 - 2.5, bz - CB0 - 3.5);
     for (let ix = 0; ix < nx; ix++) for (let iz = 0; iz < nz; iz++) {
-      const w = cw - R(1, 3), d = cd - R(1, 3), h = R(7, 16) + Math.max(0, 22 - distDown * 5) * rng();
-      const x = lx0 + cw * (ix + 0.5), z = lz0 + cd * (iz + 0.5);
+      const w = cw - R(1, 3), d = cd - R(1, 3); let h = R(7, 16) + Math.max(0, 22 - distDown * 5) * rng(); if (rng() < 0.16) h *= R(1.5, 2.3); // v6b: some mid-rises
+      const x = lx0 + cw * (ix + 0.5) + R(-0.8, 0.8), z = lz0 + cd * (iz + 0.5) + R(-0.8, 0.8); // v6b: ragged street frontage
       addB(stuccoList, bx, bz, x, z, w, d, h, pick(midColors));
+      if (rng() < 0.42 && w > 10 && d > 10) { // v6b: stepped upper tier (setback) for a varied skyline
+        const L0 = GEN_STREAM || buildings, bo = L0[L0.length - 1]; const tw = w * R(0.45, 0.68), td = d * R(0.45, 0.68), th = R(4, 13), tx = x + R(-1, 1) * (w - tw) * 0.3, tz = z + R(-1, 1) * (d - td) * 0.3;
+        addB(stuccoList, bx, bz, tx, tz, tw, td, th, pick(midColors), h, false); if (bo) bo.tier = { x: tx, z: tz, w: tw, d: td, h: th };
+      }
       if (rng() < 0.35) {
         const nc = pick(NEON);
         neonBox(x, 3.3, z + d / 2 + 0.1, w, 0.2, 0.2, nc); neonBox(x, 3.3, z - d / 2 - 0.1, w, 0.2, 0.2, nc);
@@ -1912,6 +1932,7 @@ function detailBuilding(b, D) { // v5: shared by the static v4 city and streamed
     for (const [cx, cz] of [[b.minX, b.minZ], [b.maxX, b.minZ], [b.minX, b.maxZ], [b.maxX, b.maxZ]]) D.dark.push({ x: cx, y: h / 2, z: cz, sx: 0.7, sy: h, sz: 0.7, c: [0.2, 0.21, 0.23] });
     D.dark.push({ x: b.minX + (b.maxX - b.minX) * 0.3, y: h + 1.4, z: b.minZ + (b.maxZ - b.minZ) * 0.6, sx: 5, sy: 2.8, sz: 4, c: [0.45, 0.46, 0.48] });
     for (const f of faces) faceBox(D.dark, f, f.a, f.b, 0, 4.2, 0.25, [0.1, 0.1, 0.12]); // lobby band
+    if (DQ >= 2 && h > 30 && b.btype !== undefined) { const nf = h > 90 ? 2 : 1; for (const f of faces) for (let u = f.a + 2.2; u < f.b - 1; u += (f.b - f.a) / 4.2) faceBox(D.dark, f, u, u + 0.32, 4.2, h - 0.6, 0.34, [0.14, 0.15, 0.18]); } // v6b: vertical mullion fins on towers
     return;
   }
   const col = b.color || '#e8d8c4', trimC = lighten(col, 0.55), baseC = darken(col, 0.55);
@@ -1921,7 +1942,7 @@ function detailBuilding(b, D) { // v5: shared by the static v4 city and streamed
     faceBox(D.trim, f, f.a - 0.35, f.b + 0.35, h - 0.75, h - 0.2, 0.42, trimC);         // cornice
     faceBox(D.trim, f, f.a - 0.22, f.b + 0.22, h - 0.2, h + 0.55, 0.22, trimC);        // parapet cap
     faceBox(D.trim, f, f.a, f.b, 0, 0.9, 0.12, baseC);                                  // plinth
-    if (DQ >= 1) for (let y = 4.9; y < h - 2.2; y += 3.6) faceBox(D.trim, f, f.a, f.b, y, y + 0.2, 0.13, trimC); // string courses
+    if (DQ >= 1) for (let y = 4.9; y < h - 2.2; y += DQ >= 2 ? 3.6 : 7.2) faceBox(D.trim, f, f.a, f.b, y, y + 0.2, 0.13, trimC); // string courses
     // windows (match the facade shader grid: 3.2 m bays, 3.6 m floors)
     const ww = 3.2, i0 = Math.ceil((f.a - 0.704) / ww), i1 = Math.floor((f.b - 2.5) / ww);
     const balc = !deco && DQ >= 1 && drng() < 0.3;
@@ -1929,8 +1950,8 @@ function detailBuilding(b, D) { // v5: shared by the static v4 city and streamed
       const u0 = i * ww + 0.704, u1 = i * ww + 2.496;
       for (let k = 0; ; k++) {
         const y0 = 1.3 + k * 3.6 + 0.936, y1 = 1.3 + k * 3.6 + 2.88; if (y1 > h - 1.0) break;
-        if (k === 0 && isStreet && !deco) return; // storefront level
-        if (DQ >= 2) { faceBox(D.trim, f, u0 - 0.14, u1 + 0.14, y0 - 0.14, y0, 0.24, trimC); faceBox(D.trim, f, u0 - 0.1, u1 + 0.1, y1, y1 + 0.16, 0.14, trimC); }
+        if (k === 0 && isStreet && !deco) continue; // storefront level (v6b: was `return`, which skipped all remaining facade, shopfront and rooftop detail)
+        if (DQ >= 2) { if (!IS_MOBILE) faceBox(D.trim, f, u0 - 0.14, u1 + 0.14, y0 - 0.14, y0, 0.24, trimC); else if (i === i0) faceBox(D.trim, f, f.a + 0.5, f.b - 0.5, y0 - 0.14, y0, 0.2, trimC); if (!IS_MOBILE) faceBox(D.trim, f, u0 - 0.1, u1 + 0.1, y1, y1 + 0.16, 0.14, trimC); }
         if (deco && f.nx > 0 && DQ >= 1) faceBox(D.trim, f, u0 - 0.3, u1 + 0.3, y1 + 0.22, y1 + 0.32, 0.75, trimC); // deco "eyebrow" shades
         if (balc && k >= 1 && (i + k) % 2 === 0) {
           const [px, pz] = facePoint(f, (u0 + u1) / 2, 0); const ry = faceRY(f);
@@ -1939,16 +1960,22 @@ function detailBuilding(b, D) { // v5: shared by the static v4 city and streamed
         }
       }
     }
-    if (DQ >= 1 && !deco) for (const u of [f.a + 0.3, f.b - 0.3]) faceBox(D.trim, f, u - 0.3, u + 0.3, 0.9, h - 0.75, 0.16, trimC); // pilasters
+    if (DQ >= 1 && !deco && h > 9) { // v6b: window AC units, blade signs and back-alley fire escapes
+      let nAcU = 0;
+      for (let i = i0; i <= i1 && nAcU < (DQ >= 2 ? 5 : 2); i++) { const k = 1 + Math.floor(drng() * 3); const y0 = 1.3 + k * 3.6 + 0.936; if (y0 + 1.5 > h - 1.0 || drng() > (DQ >= 2 ? 0.28 : 0.14)) continue; const uc = i * ww + 1.6; const [px, pz] = facePoint(f, uc, 0.3); D.metal.push({ x: px, y: y0 - 0.12, z: pz, sx: f.nx ? 0.6 : 0.85, sy: 0.5, sz: f.nx ? 0.85 : 0.6, c: [0.78, 0.79, 0.8] }); nAcU++; }
+      if (DQ >= 1 && isStreet && drng() < 0.3) { const [bx0, bz0] = facePoint(f, f.a + 1.2, 0.9); D.shop[Math.floor(drng() * (DQ >= 2 && !IS_MOBILE ? SHOP_MATS.length : DQ >= 2 ? 3 : 2))].push({ x: bx0, y: 5.6, z: bz0, sx: 1.5, sy: 1.5, sz: 1, ry: faceRY(f) + Math.PI / 2 }); D.metal.push({ x: facePoint(f, f.a + 1.2, 0.45)[0], y: 6.5, z: facePoint(f, f.a + 1.2, 0.45)[1], sx: f.nx ? 0.9 : 0.06, sy: 0.06, sz: f.nx ? 0.06 : 0.9, c: [0.2, 0.2, 0.22] }); }
+      if (DQ >= 2 && !isStreet && h > 12) { const uc = (f.a + f.b) / 2 + (drng() - 0.5) * 3; for (let y = 4.9; y < h - 2.5; y += 3.6) { const [px, pz] = facePoint(f, uc, 0.6); D.dark.push({ x: px, y: y, z: pz, sx: f.nx ? 1.2 : 2.6, sy: 0.08, sz: f.nx ? 2.6 : 1.2, c: [0.16, 0.16, 0.18] }); D.rail.push({ x: facePoint(f, uc, 0.0)[0], y: y + 0.05, z: facePoint(f, uc, 0.0)[1], sx: 2.6, sy: 1, sz: 1, ry: faceRY(f), c: [0.14, 0.14, 0.16] }); } }
+    }
+    if (DQ >= 2 && !deco) for (const u of [f.a + 0.3, f.b - 0.3]) faceBox(D.trim, f, u - 0.3, u + 0.3, 0.9, h - 0.75, 0.16, trimC); // pilasters
     // storefronts + awnings on street level
     if (isStreet && !deco) {
       const L = f.b - f.a, n = Math.max(1, Math.floor(L / 6.5)), seg = L / n;
       for (let s = 0; s < n; s++) {
-        const u0 = f.a + s * seg + 0.45, u1 = f.a + (s + 1) * seg - 0.45, si = Math.floor(drng() * SHOP_MATS.length);
+        const u0 = f.a + s * seg + 0.45, u1 = f.a + (s + 1) * seg - 0.45, si = Math.floor(drng() * (DQ >= 2 && !IS_MOBILE ? SHOP_MATS.length : DQ >= 2 ? 3 : 2));
         const [px, pz] = facePoint(f, (u0 + u1) / 2, 0.03);
-        D.shop[si].push({ x: px, y: 2.25, z: pz, sx: u1 - u0, sy: 4.1, sz: 1, ry: faceRY(f) });
+        if (DQ >= 1) D.shop[si].push({ x: px, y: 2.25, z: pz, sx: u1 - u0, sy: 4.1, sz: 1, ry: faceRY(f) });
         faceBox(D.trim, f, u1, u1 + 0.9, 0.9, 4.4, 0.2, trimC);
-        if (drng() < 0.65) { const [ax, az] = facePoint(f, (u0 + u1) / 2, 0); D.awn.push({ x: ax, y: 3.75, z: az, sx: u1 - u0 + 0.2, sy: 1, sz: 1, ry: faceRY(f), c: rpick([[0.85, 0.15, 0.2], [0.1, 0.45, 0.35], [0.12, 0.3, 0.6], [0.95, 0.6, 0.15], [0.9, 0.9, 0.88], [0.55, 0.2, 0.55]]) }); }
+        if (DQ >= 1 && drng() < 0.65) { const [ax, az] = facePoint(f, (u0 + u1) / 2, 0); D.awn.push({ x: ax, y: 3.75, z: az, sx: u1 - u0 + 0.2, sy: 1, sz: 1, ry: faceRY(f), c: rpick([[0.85, 0.15, 0.2], [0.1, 0.45, 0.35], [0.12, 0.3, 0.6], [0.95, 0.6, 0.15], [0.9, 0.9, 0.88], [0.55, 0.2, 0.55]]) }); }
       }
       faceBox(D.trim, f, f.a, f.b, 4.35, 4.6, 0.3, trimC);
     }
@@ -1960,20 +1987,24 @@ function detailBuilding(b, D) { // v5: shared by the static v4 city and streamed
   }
   // rooftop clutter
   const rw = b.maxX - b.minX, rd = b.maxZ - b.minZ;
+  const T = b.tier, onTier = (x, z, r) => T && Math.abs(x - T.x) < T.w / 2 + r && Math.abs(z - T.z) < T.d / 2 + r;
+  if (T && DQ >= 1) { const tf = [{ nx: 1, nz: 0, plane: T.x + T.w / 2, a: T.z - T.d / 2, b: T.z + T.d / 2 }, { nx: -1, nz: 0, plane: T.x - T.w / 2, a: T.z - T.d / 2, b: T.z + T.d / 2 }, { nx: 0, nz: 1, plane: T.z + T.d / 2, a: T.x - T.w / 2, b: T.x + T.w / 2 }, { nx: 0, nz: -1, plane: T.z - T.d / 2, a: T.x - T.w / 2, b: T.x + T.w / 2 }];
+    for (const f of tf) { faceBox(D.trim, f, f.a - 0.3, f.b + 0.3, h + T.h - 0.7, h + T.h - 0.2, 0.4, trimC); faceBox(D.trim, f, f.a - 0.2, f.b + 0.2, h + T.h - 0.2, h + T.h + 0.5, 0.2, trimC); }
+    D.metal.push({ x: T.x, y: h + T.h + 0.5, z: T.z, sx: 1.6, sy: 1.0, sz: 2.0, c: [0.72, 0.73, 0.74] }); }
   const nAC = DQ === 0 ? 1 : Math.min(4, 1 + Math.floor(rw * rd / 120));
   for (let k = 0; k < nAC; k++) {
-    const x = DR(b.minX + 2, b.maxX - 2), z = DR(b.minZ + 2, b.maxZ - 2);
+    let x = DR(b.minX + 2, b.maxX - 2), z = DR(b.minZ + 2, b.maxZ - 2); for (let t = 0; t < 4 && onTier(x, z, 1.5); t++) { x = DR(b.minX + 2, b.maxX - 2); z = DR(b.minZ + 2, b.maxZ - 2); } if (onTier(x, z, 1.5)) continue;
     D.metal.push({ x, y: h + 0.5, z, sx: 1.4, sy: 1.0, sz: 1.8, c: [0.72, 0.73, 0.74] });
     if (DQ >= 1) D.fan.push({ x, y: h + 1.02, z, sx: 1, sy: 1, sz: 1, c: [0.2, 0.2, 0.22] });
   }
-  if (!deco && drng() < 0.35 && rw > 9 && rd > 9) D.tank.push({ x: DR(b.minX + 3, b.maxX - 3), y: h, z: DR(b.minZ + 3, b.maxZ - 3), sx: 1, sy: 1, sz: 1, c: rpick([[0.45, 0.32, 0.22], [0.6, 0.6, 0.62]]) });
-  if (drng() < 0.5) { const x = DR(b.minX + 2, b.maxX - 3), z = DR(b.minZ + 2, b.maxZ - 3); D.trim.push({ x, y: h + 1.4, z, sx: 2.6, sy: 2.8, sz: 3.2, c: trimC }); }
-  if (drng() < 0.45) { const x = DR(b.minX + 1, b.maxX - 1), z = DR(b.minZ + 1, b.maxZ - 1), ah = DR(3, 8); D.metal.push({ x, y: h + ah / 2, z, sx: 0.08, sy: ah, sz: 0.08, c: [0.3, 0.3, 0.32] }); D.metal.push({ x, y: h + ah * 0.75, z, sx: 1.2, sy: 0.05, sz: 0.05, c: [0.3, 0.3, 0.32] }); }
+  if (!deco && !T && drng() < 0.35 && rw > 9 && rd > 9) D.tank.push({ x: DR(b.minX + 3, b.maxX - 3), y: h, z: DR(b.minZ + 3, b.maxZ - 3), sx: 1, sy: 1, sz: 1, c: rpick([[0.45, 0.32, 0.22], [0.6, 0.6, 0.62]]) });
+  if (!T && drng() < 0.5) { const x = DR(b.minX + 2, b.maxX - 3), z = DR(b.minZ + 2, b.maxZ - 3); D.trim.push({ x, y: h + 1.4, z, sx: 2.6, sy: 2.8, sz: 3.2, c: trimC }); }
+  if (!T && drng() < 0.45) { const x = DR(b.minX + 1, b.maxX - 1), z = DR(b.minZ + 1, b.maxZ - 1), ah = DR(3, 8); D.metal.push({ x, y: h + ah / 2, z, sx: 0.08, sy: ah, sz: 0.08, c: [0.3, 0.3, 0.32] }); D.metal.push({ x, y: h + ah * 0.75, z, sx: 1.2, sy: 0.05, sz: 0.05, c: [0.3, 0.3, 0.32] }); }
 }
 for (const b of buildings) detailBuilding(b, DET);
 // geometries
 const awnGeo = (() => { const g1 = new THREE.PlaneGeometry(1, 1.55, 1, 1); g1.rotateX(-Math.PI / 2 + 0.42); g1.translate(0, -0.3, 0.72); const g2 = new THREE.PlaneGeometry(1, 0.3).translate(0, -0.78, 1.42); return mergeGeometries([g1, g2]); })();
-const railGeo = (() => { const parts = [new THREE.BoxGeometry(1, 0.05, 0.05).translate(0, 1.0, 1.08)]; for (let k = 0; k <= 8; k++) parts.push(new THREE.BoxGeometry(0.025, 1.0, 0.025).translate(-0.5 + k / 8, 0.5, 1.08)); parts.push(new THREE.BoxGeometry(0.04, 0.04, 1.08).translate(-0.5, 1.0, 0.54), new THREE.BoxGeometry(0.04, 0.04, 1.08).translate(0.5, 1.0, 0.54)); return mergeGeometries(parts); })();
+const railGeo = (() => { const parts = [new THREE.BoxGeometry(1, 0.05, 0.05).translate(0, 1.0, 1.08)]; const full = DQ >= 2 && !IS_MOBILE; for (let k = 0; k <= 8; k += full ? 1 : 2) parts.push(new THREE.BoxGeometry(0.025, 1.0, 0.025).translate(-0.5 + k / 8, 0.5, 1.08)); if (full) parts.push(new THREE.BoxGeometry(0.04, 0.04, 1.08).translate(-0.5, 1.0, 0.54), new THREE.BoxGeometry(0.04, 0.04, 1.08).translate(0.5, 1.0, 0.54)); return mergeGeometries(parts); })();
 const tankGeo = (() => { const parts = [new THREE.CylinderGeometry(1.3, 1.3, 2.4, 14).translate(0, 3.0, 0), new THREE.ConeGeometry(1.4, 0.7, 14).translate(0, 4.55, 0)]; for (const [x, z] of [[0.9, 0.9], [-0.9, 0.9], [0.9, -0.9], [-0.9, -0.9]]) parts.push(new THREE.BoxGeometry(0.12, 1.8, 0.12).translate(x, 0.9, z)); return mergeGeometries(parts); })();
 const fanGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.06, 12);
 const shopGeo = new THREE.PlaneGeometry(1, 1);
@@ -3867,11 +3898,11 @@ const PRESET_FX = {
   low: { shadows: 0, ao: false, ssr: false, dof: false, motionBlur: false, grain: false, bloomFx: false, lens: false, eyeAdapt: false, dynRes: true, detail: 70 },
   medium: { shadows: 0, ao: false, ssr: false, dof: false, motionBlur: true, grain: true, bloomFx: true, lens: false, eyeAdapt: false, dynRes: true, detail: 110 },
   high: { shadows: 2048, ao: true, ssr: true, dof: false, motionBlur: true, grain: true, bloomFx: true, lens: true, eyeAdapt: true, dynRes: true, detail: 190 },
-  ultra: { shadows: 4096, ao: true, ssr: true, dof: true, motionBlur: true, grain: true, bloomFx: true, lens: true, eyeAdapt: true, dynRes: false, detail: 320 },
+  ultra: { shadows: 4096, ao: true, ssr: true, dof: false, motionBlur: true, grain: true, bloomFx: true, lens: true, eyeAdapt: true, dynRes: false, detail: 320 },
 };
 if (IS_MOBILE) { // v6a: mobile presets drop the expensive post chain and cascades
   Object.assign(PRESET_FX.low, { dynRes: true, detail: 52 }); Object.assign(PRESET_FX.medium, { motionBlur: false, grain: false, bloomFx: false, detail: 64, dynRes: true });
-  for (const k of ['high', 'ultra']) Object.assign(PRESET_FX[k], { shadows: 1024, ao: false, ssr: false, dof: false, motionBlur: false, lens: false, eyeAdapt: false, grain: false, bloomFx: true, dynRes: true, detail: k === 'ultra' ? 130 : 110 });
+  for (const k of ['high', 'ultra']) Object.assign(PRESET_FX[k], { shadows: MOBILE_HIGH ? 2048 : 1024, ao: false, ssr: false, dof: false, motionBlur: false, lens: false, eyeAdapt: false, grain: false, bloomFx: true, dynRes: true, detail: k === 'ultra' ? 130 : 110 });
 }
 function FX(k) {
   const v = S[k], p = (PRESET_FX[QNAME] || PRESET_FX.medium)[k];
@@ -4021,12 +4052,13 @@ function applyFX() {
 }
 // ---------- dynamic resolution (only after sustained overruns; recovers with headroom) + 30 fps fallback ----------
 const DYNRES = { on: true, scale: 1, overT: 0, underT: 0, cap30: false, skip: false, min: 0.6,
-  base() { return Math.min(window.devicePixelRatio || 1, Q.pr, IS_MOBILE ? 1.0 : 2.5); },
+  base() { return Math.min(window.devicePixelRatio || 1, Q.pr, IS_MOBILE ? (MOBILE_HIGH ? 2.0 : 1.25) : 2.5); },
+  floorScale() { return IS_MOBILE ? clamp(1.0 / Math.max(this.base(), 1), 0.5, 1) : this.min; }, // v6b: phones drop resolution first, but never below ~1 device px per CSS px; the governor then drops detail
   apply() { renderer.setPixelRatio(this.base() * this.scale); if (typeof onResize === 'function') onResize(); },
   frame(ftMs) {
     if (!this.on || G.state !== 'playing') { this.overT = this.underT = 0; return; }
     if (ftMs > 22) { this.overT += ftMs; this.underT = 0; } else if (ftMs < (this.cap30 ? 26 : 13.5)) { this.underT += ftMs; this.overT = Math.max(0, this.overT - ftMs * 0.5); } else { this.overT = Math.max(0, this.overT - ftMs * 0.25); this.underT = 0; }
-    if (this.overT > 1500) { this.overT = 0; if (this.scale > this.min + 0.001) { this.scale = Math.max(this.min, this.scale - 0.1); this.apply(); } else if (!this.cap30) this.cap30 = true; }
+    if (this.overT > 1500) { this.overT = 0; const fl = this.floorScale(); if (this.scale > fl + 0.001) { this.scale = Math.max(fl, this.scale - (IS_MOBILE ? 0.15 : 0.1)); this.apply(); } else if (!this.cap30) this.cap30 = true; }
     if (this.underT > 4000) { this.underT = 0; if (this.cap30) this.cap30 = false; else if (this.scale < 1) { this.scale = Math.min(1, this.scale + 0.05); this.apply(); } }
   },
 };
@@ -4062,7 +4094,7 @@ function updateFX(dt) {
   // camera-velocity motion blur (rotation component), subtle
   if (FX('motionBlur') && dt > 0) {
     camera.getWorldDirection(_cf); const dyaw = Math.atan2(_cf.x, _cf.z) - Math.atan2(_cf0.x, _cf0.z), dp = _cf.y - _cf0.y; _cf0.copy(_cf);
-    const w = wrapAngle(dyaw) / dt, pv = dp / dt; const k = 0.0035; let bx = clamp(-w * k, -0.02, 0.02), by = clamp(pv * k, -0.015, 0.015); if (Math.hypot(bx, by) < 0.0015) { bx = 0; by = 0; }
+    const w = wrapAngle(dyaw) / dt, pv = dp / dt; const k = 0.0018; let bx = clamp(-w * k, -0.008, 0.008), by = clamp(pv * k, -0.006, 0.006); if (Math.hypot(bx, by) < 0.0012) { bx = 0; by = 0; }
     grainPass.uniforms.uBlurDir.value.set(bx, by);
   } else grainPass.uniforms.uBlurDir.value.set(0, 0);
 }
@@ -7378,7 +7410,8 @@ function govOverrides() {
   const _df = DYNRES.frame;
   DYNRES.frame = function (ftMs) {
     _df.call(this, ftMs); if (!GOV.on || G.state !== 'playing') { GOV.over = GOV.under = 0; return; }
-    if (ftMs > 22) { GOV.over += ftMs; GOV.under = 0; } else if (ftMs < 15) { GOV.under += ftMs; GOV.over = Math.max(0, GOV.over - ftMs * 0.5); } else { GOV.over = Math.max(0, GOV.over - ftMs * 0.25); GOV.under = 0; }
+    const resLeft = DYNRES.on && S.dynRes !== 'Off' && DYNRES.scale > DYNRES.floorScale() + 0.001; // v6b: the governor only drops detail once resolution is already at its floor
+    if (ftMs > 22) { if (resLeft) GOV.over = Math.max(0, GOV.over - ftMs * 0.25); else GOV.over += ftMs; GOV.under = 0; } else if (ftMs < 15) { GOV.under += ftMs; GOV.over = Math.max(0, GOV.over - ftMs * 0.5); } else { GOV.over = Math.max(0, GOV.over - ftMs * 0.25); GOV.under = 0; }
     if (GOV.over > 2600 && GOV.lvl < GOV.max) { GOV.over = 0; GOV.lvl++; applyFX(); if (GOV.lvl === 1) toast('AUTO QUALITY: SHADOWS OFF', '#29f0ff'); else if (GOV.lvl === 3) toast('AUTO QUALITY: SHORTER VIEW, FEWER CROWDS', '#29f0ff'); }
     else if (GOV.under > 12000 && GOV.lvl > 0) { GOV.under = 0; GOV.lvl--; applyFX(); }
   };
@@ -7782,7 +7815,7 @@ const KF = [
   { t: 1.00, top: 0x05021a, hor: 0x2a0d4a, sun: 0x6070c0, si: 0.35, hs: 0x3a2a80, hg: 0x140a20, hi: 0.45, fog: 0x1a0b30, fd: 0.0032, bloom: 0.85, night: 1 },
 ];
 for (const k of KF) for (const f of ['top', 'hor', 'sun', 'hs', 'hg', 'fog']) k[f] = new THREE.Color(k[f]);
-for (const k of KF) k.fd *= 0.42; // v6a: clear, sunny Vice City look (the haze was far too thick, especially on phones)
+for (const k of KF) k.fd *= 0.25; // v6a: clear, sunny Vice City look (the haze was far too thick, especially on phones)
 const sunDir = new THREE.Vector3(), lightDir = new THREE.Vector3();
 const _hdrFog = new THREE.Color(), _hdrTmp = new THREE.Color();
 function updateSky() {
@@ -7815,7 +7848,7 @@ function updateSky() {
     scene.fog.color.lerp(_hdrFog, 0.5); OCEAN_U.uFogCol.value.copy(scene.fog.color);
     hemi.intensity *= 0.55;
   }
-  bloomPass.strength = lerp(a.bloom, b.bloom, f) * (SKY_U.uHdr.value > 0.5 ? lerp(0.45, 0.9, night) : 1); bloomPass.threshold = lerp(0.85, 0.72, night); bloomPass.radius = lerp(0.4, 0.5, night);
+  bloomPass.strength = lerp(a.bloom, b.bloom, f) * 0.7 * (SKY_U.uHdr.value > 0.5 ? lerp(0.45, 0.9, night) : 1); bloomPass.threshold = lerp(0.9, 0.78, night); bloomPass.radius = lerp(0.28, 0.4, night); // v6b: tighter, less smeary bloom
   MAT.neon.color.setScalar(lerp(1.0, 1.7, night));
   const blink = (G.time % 1.6) < 0.25; MAT.beacon.color.setRGB(blink ? 5 : 0.25, 0.04, 0.04);
   MAT.lampHead.color.setRGB(lerp(0.9, 4.2, night), lerp(0.86, 3.3, night), lerp(0.78, 2.2, night));
@@ -7947,7 +7980,7 @@ function updateCamera(dt) {
   { // speed feel: subtle high-frequency shake + radial blur when going fast
     const sp = player.car ? Math.abs(player.car.speed) : 0; const k = clamp((sp - 26) / 30, 0, 1);
     if (k > 0) { const a = k * 0.045; camera.position.y += Math.sin(G.time * 37.1) * a + Math.sin(G.time * 13.3) * a * 0.6; camera.position.x += Math.sin(G.time * 29.7 + 1.3) * a * 0.5; }
-    grainPass.uniforms.uBlur.value = FX('motionBlur') ? k * k * 0.018 : 0;
+    grainPass.uniforms.uBlur.value = FX('motionBlur') ? k * k * 0.008 : 0;
   }
   if (player.car) camera.lookAt(camLook); else { camera.lookAt(camera.position.x + (camLook.x - camTarget.x), camera.position.y + (camLook.y - camTarget.y), camera.position.z + (camLook.z - camTarget.z)); }
   if (G.drunkT > 0) { const k = Math.min(1, G.drunkT / 10) * 0.06; camera.rotateZ(Math.sin(G.time * 1.3) * k); camera.rotateX(Math.sin(G.time * 0.9) * k * 0.4); }
@@ -8178,16 +8211,17 @@ function bez(p0, p1, p2, p3, n) { const out = []; for (let i = 0; i <= n; i++) {
     bagCyl(bag, U_DISC, x, y, z, 10.2, 0.03, 10.2, hexc('#b98062')); bagCyl(bag, U_DISC, x, y + 0.012, z, 9.1, 0.03, 9.1, hexc('#c99a76')); bagCyl(bag, U_DISC, x, y + 0.024, z, 7.6, 0.03, 7.6, hexc('#d9b48c')); bagCyl(bag, U_DISC, x, y + 0.036, z, 7.0, 0.03, 7.0, hexc('#3a3a40')); bagCyl(bag, U_DISC, x, y + 0.048, z, 6.9, 0.03, 6.9, hexc('#2b2d33'));
     VARIETY.plazas++;
   }
-  // rooftop detail: AC units, water tanks, antennas (not on Low: draw calls)
-  if (QNAME !== 'low') {
-    const roofs = []; for (const b of buildings) roofs.push(b); for (let bx = 0; bx < NB; bx++) for (let bz = 0; bz < NB; bz++) if (!inCoreB(bx, bz) && blockBuildings[bx][bz]) for (const b of blockBuildings[bx][bz]) roofs.push(b);
-    for (const b of roofs) { const w = b.maxX - b.minX, d = b.maxZ - b.minZ; if ((b.h || 0) < 11 || w < 9 || d < 9) continue; const hh = hash2((b.minX * 3) | 0, (b.minZ * 7) | 0); const bag = bagAt(b.minX, b.minZ, true), cxm = (b.minX + b.maxX) / 2, czm = (b.minZ + b.maxZ) / 2;
-      bagBox(bag, b.minX + w * (0.25 + hh * 0.3), b.h + 0.6, b.minZ + d * (0.3 + hh * 0.2), 2.6, 1.2, 2.2, hh * 3, hexc('#8f969e'));
-      if (hh > 0.45) bagBox(bag, b.minX + w * 0.7, b.h + 0.5, b.minZ + d * 0.7, 1.8, 1, 1.8, 0.4, hexc('#7d858d'));
-      if (hh > 0.62) { bagCyl(bag, U_CYL, cxm, b.h + 2.1, czm, 1.3, 2.2, 1.3, hexc('#8a6a4a')); bagBox(bag, cxm, b.h + 0.7, czm, 0.25, 1.4, 0.25, 0, hexc('#555')); }
-      if (hh < 0.4 && b.h > 24) { bagBox(bag, b.maxX - 1.5, b.h + 3, b.maxZ - 1.5, 0.18, 6, 0.18, 0, hexc('#444a52')); bagBox(bag, b.maxX - 1.5, b.h + 6.1, b.maxZ - 1.5, 0.4, 0.4, 0.4, 0, hexc('#ff3b3b')); }
-      VARIETY.roofs++;
-    }
+  // bus stops: glass shelter with roof, bench and a route sign on the sidewalk strip, a short walk from a junction (all merged per cell)
+  for (let i = 1; i < NB; i++) for (let j = 1; j < NB; j++) { const deg = nodeDeg(i, j); if (deg < 3) continue; const h = hash2(i * 13 + 5, j * 31 + 7); if (h > 0.09) continue;
+    const d = (h * 1000 | 0) % 2, sgn = ((h * 7000) | 0) % 2 ? 1 : -1, x0 = nodeX(i), z0 = nodeX(j), y0 = nodeH(i, j) + 0.16;
+    if (!edgeOK(i, j, d)) continue; // an edge of this orientation must exist to put the stop on
+    const along = 20 + (h * 91 % 8), side = HALF_ROAD + 1.9, bx = d === 0 ? x0 + along : x0 + side * sgn, bz = d === 0 ? z0 + side * sgn : z0 + along, bag = bagAt(bx, bz, false);
+    const P = (u, v) => (d === 0 ? [bx + u, bz + v * sgn] : [bx + v * sgn, bz + u]); // u along the kerb, v away from the road
+    const B = (u, v, y, su, sy, sv, col) => { const [qx, qz] = P(u, v); bagBox(bag, qx, y0 + y, qz, d === 0 ? su : sv, sy, d === 0 ? sv : su, 0, col); };
+    const glass = hexc('#7fc4d6'), frame = hexc('#2b3038'), bench = hexc('#8a6a48');
+    B(0, 0.9, 1.1, 3.2, 2.1, 0.06, glass); B(-1.55, 0.5, 1.15, 0.1, 2.3, 0.1, frame); B(1.55, 0.5, 1.15, 0.1, 2.3, 0.1, frame); B(0, 0.1, 2.3, 3.5, 0.1, 1.8, frame);
+    B(0, 0.5, 0.5, 2.2, 0.1, 0.5, bench); B(2.6, -0.5, 1.5, 0.08, 3.0, 0.08, frame); B(2.6, -0.5, 2.8, 0.7, 0.7, 0.06, hexc('#2f86e0'));
+    VARIETY.stops = (VARIETY.stops || 0) + 1;
   }
   for (const [k, e] of cellBags) { const m = e.bag.mesh(e.roof ? VAR_ROOF_MAT : VAR_MAT); m.frustumCulled = true; scene.add(m); const bs = m.geometry.boundingSphere; VARIETY.cells.push({ m, c: bs.center.clone(), r: bs.radius, roof: e.roof }); }
 }
@@ -8423,7 +8457,7 @@ function applyQuality(name) {
   DYNRES.scale = 1; renderer.setPixelRatio(DYNRES.base()); onResize();
   G.shadows = Q.shadow > 0; sun.castShadow = G.shadows;
   if (Q.shadow && sun.shadow.mapSize.x !== Q.shadow) { sun.shadow.mapSize.set(Q.shadow, Q.shadow); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
-  G.bloom = Q.bloom; bloomPass.enabled = Q.bloom; fxaaPass.enabled = Q.fxaa; grainPass.enabled = Q.grain;
+  G.bloom = Q.bloom; bloomPass.enabled = Q.bloom; fxaaPass.enabled = Q.fxaa; grainPass.enabled = Q.grain; setFxaaRes();
   gtaoPass.enabled = !!Q.ao; onResize();
   camera.far = Q.far; camera.updateProjectionMatrix();
   for (const m of [MAT.road, MAT.inter, MAT.sidewalk, MAT.sand, MAT.stucco]) { const d = m.userData.det; if (d) d.uDNorOn.value = Q.detNor && d.uDNor.value !== d.uDMap.value ? 1 : 0; }
